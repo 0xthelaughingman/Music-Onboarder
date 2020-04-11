@@ -16,7 +16,7 @@ class NameHandler:
                 pair = match.group("artist").strip().lower() + "-" +match.group("song").strip().lower()
 
             else:
-                pair = "INVALID FILETYPE-" + "\"" + name + "\""
+                pair = "INVALID FILENAME-" + name
 
             self.asset_pair.append(pair)
 
