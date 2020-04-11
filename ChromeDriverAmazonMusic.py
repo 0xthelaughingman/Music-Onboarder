@@ -96,7 +96,7 @@ class ChromeDriverAmazonMusic:
                     self.driver.find_element_by_xpath("//*[@id=\"contextMenuContainer\"]/section/ul/li[2]/div").click()
                     time.sleep(2)
                     self.driver.find_element_by_xpath(
-                        "//*[@id=\"contextMenuContainer\"]/section/ul/li/div/span[contains(text(), '" + self.playlist_name + "')]").click()
+                        "//dl/dd/ul/li/span[contains(text(), '" + self.playlist_name + "')]").click()
 
                     found = 1
                     break
