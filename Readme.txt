@@ -5,7 +5,7 @@ Objective:
 
 What to run/driver:
 ----PRIMARY:
--   All of the selenium automation is in ChromeDriverAmazonMusic.py
+-   All of the selenium automation is in ChromeDriverAmazonMusic.py, run it via TestDriver.py
 -   Ensure you set the appropriate path to the chromedriver depending on the OS, download the file/update as needed.
 -   Update user/pass for local testing *only*
 ----OTHERS:
