@@ -1,8 +1,10 @@
 import re
+import sys
 import time
 
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -19,8 +21,11 @@ class ChromeDriverAmazonMusic:
 
     def __init__(self, test_mode=False, email=None, password=None, playlist=None, asset_list=None):
 
-        # Change as per the OS/chromedriver combination
-        self.driver = webdriver.Chrome('./webdriver/chromedriver_mac64')
+        # Only supporting win/Mac OS X
+        if sys.platform == "win32":
+            self.driver = webdriver.Chrome('./webdriver/chromedriver.exe')
+        else:
+            self.driver = webdriver.Chrome('./webdriver/chromedriver_mac64')
         # Primary page should be 'music.amazon.com', '.in' just to ease testing, otherwise 2 hops of log-ins
         self.driver.implicitly_wait(10)
         self.driver.get('https://music.amazon.in/')
@@ -55,16 +60,17 @@ class ChromeDriverAmazonMusic:
         self.driver.find_element_by_xpath("//*[@id=\"newPlaylistName\"]").send_keys(self.playlist_name)
         self.driver.find_element_by_xpath("//*[@id=\"savePlaylistDialog\"]/a").click()
 
-
     def find_assets(self, asset_list):
         # testing
         if asset_list is None:
-            asset_list = ["alan walker-force", "ahrix-nova", "alan walker-spectre"]
+            asset_list = ["alan walker-force", "siafugasudfgsidfg-asudgausgdausydg", "ahrix-nova", "alan walker-spectre"]
+            #asset_list = ["siafugasudfgsidfg-asudgausgdausydg"]
         for asset in asset_list:
             asset_group = asset.split("-")
             asset_artist = asset_group[0]
             asset_song = asset_group[1]
             if asset_artist == "INVALID FILENAME":
+                self.status.append("FAILED :: ")
                 continue
 
             # print(asset_song, asset_artist)
@@ -76,13 +82,19 @@ class ChromeDriverAmazonMusic:
 
             self.driver.find_element_by_xpath("//*[@id=\"dragonflyTransport\"]/div/div[1]/div/button").click()
             self.driver.find_element_by_xpath("//*[@id=\"dragonflyTransport\"]/div/div[1]/div/button").click()
+
             results = self.driver.find_elements_by_xpath(
                 "//*[@id=\"dragonflyView\"]/div/div[2]/div[2]/section/section[3]/div[2]/div/div[1]/div")
+
+            # Expected to handle an exception for this case...but this seems to work somehow...
+            if len(results) == 0:
+                self.status.append("NO RESULTS :: " + asset)
+                continue
 
             # iterate result tiles and match, max attempts = 5
             found = 0
             i = 0
-            for i in range(1, len(results)):
+            for i in range(1, min(len(results), 5)):
                 tile_song = self.driver.find_element_by_xpath(
                     "//*[@id=\"dragonflyView\"]/div/div[2]/div[2]/section/section[3]/div[2]/div/div[1]/div[" + str(i) + "]/div[2]/div[1]").get_attribute("title").lower()
 
@@ -107,10 +119,10 @@ class ChromeDriverAmazonMusic:
                     break
 
             if found == 1:
-                self.status.append("SUCCESS :: " + asset)
+                self.status.append("MATCH SUCCESS :: " + asset)
 
             else:
-                self.status.append("FAILED :: " + str(asset))
+                self.status.append("FAILED TO MATCH :: " + asset)
 
     def get_status(self):
         return self.status
