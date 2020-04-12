@@ -18,12 +18,12 @@ class ChromeDriverAmazonMusic:
     password = "password"
 
     def __init__(self, test_mode=False, email=None, password=None, playlist=None, asset_list=None):
-        # Change as per the OS/chromedriver combination
-        self.driver = webdriver.Chrome('./webdriver/chromedriver.exe')
-        # Primary page should be 'music.amazon.com', '.in' just to ease testing, otherwise 2 hops of log-ins
-        self.driver.get('https://music.amazon.in/')
 
-        time.sleep(2)
+        # Change as per the OS/chromedriver combination
+        self.driver = webdriver.Chrome('./webdriver/chromedriver_mac64')
+        # Primary page should be 'music.amazon.com', '.in' just to ease testing, otherwise 2 hops of log-ins
+        self.driver.implicitly_wait(10)
+        self.driver.get('https://music.amazon.in/')
         if test_mode is False:
             print("Please Sign in to the service.\n")
             while True:
@@ -34,13 +34,10 @@ class ChromeDriverAmazonMusic:
             self.password = password
             self.email = email
             self.driver.find_element_by_xpath("//*[@id=\"dialogBoxView\"]/section/section/section[2]/button[2]").click()
-            time.sleep(1)
             self.driver.find_element_by_xpath("//*[@id=\"contextMenu\"]/li[1]/a").click()
-            time.sleep(4)
             self.driver.find_element_by_xpath("//*[@id=\"ap_email\"]").send_keys(self.email)
             self.driver.find_element_by_xpath("//*[@id=\"ap_password\"]").send_keys(self.password)
             self.driver.find_element_by_xpath("//*[@id=\"signInSubmit\"]").click()
-            time.sleep(2)
 
         self.setup_playlist(playlist)
         self.asset_list = asset_list
@@ -53,14 +50,11 @@ class ChromeDriverAmazonMusic:
             self.playlist_name = input("Enter the new playlist name...\n")
         else:
             self.playlist_name = playlist
-
+        time.sleep(3)
         self.driver.find_element_by_xpath("//*[@id=\"newPlaylist\"]").click()
-        time.sleep(2)
         self.driver.find_element_by_xpath("//*[@id=\"newPlaylistName\"]").send_keys(self.playlist_name)
-        time.sleep(2)
         self.driver.find_element_by_xpath("//*[@id=\"savePlaylistDialog\"]/a").click()
 
-        time.sleep(5)
 
     def find_assets(self, asset_list):
         # testing
@@ -81,9 +75,7 @@ class ChromeDriverAmazonMusic:
             search_area.send_keys(asset_artist + " " + asset_song)
 
             self.driver.find_element_by_xpath("//*[@id=\"dragonflyTransport\"]/div/div[1]/div/button").click()
-            time.sleep(1)
             self.driver.find_element_by_xpath("//*[@id=\"dragonflyTransport\"]/div/div[1]/div/button").click()
-            time.sleep(2)
             results = self.driver.find_elements_by_xpath(
                 "//*[@id=\"dragonflyView\"]/div/div[2]/div[2]/section/section[3]/div[2]/div/div[1]/div")
 
@@ -100,16 +92,13 @@ class ChromeDriverAmazonMusic:
                 print(asset_song, asset_artist, "VS", tile_song, tile_artist)
                 # Match condition, needs a proper handler class with advanced logic/fuzzy....
                 if (tile_song == asset_artist and tile_artist == asset_song) or (tile_song == asset_song and tile_artist == asset_artist):
-                    time.sleep(1)
                     self.driver.find_element_by_xpath("//*[@id=\"dragonflyView\"]/div/div[1]/div/h1").click()
 
                     # Making sure with move_to that the element is visible/interactable
                     button = self.driver.find_element_by_xpath(
                         "//*[@id=\"dragonflyView\"]/div/div[2]/div[2]/section/section[3]/div[2]/div/div[1]/div[" + str(i) + "]/div[3]/span[3]")
                     ActionChains(self.driver).move_to_element(button).click(button).perform()
-                    time.sleep(2)
                     self.driver.find_element_by_xpath("//*[@id=\"contextMenuContainer\"]/section/ul/li[2]/div").click()
-                    time.sleep(2)
                     self.driver.find_element_by_xpath(
                         "//dl/dd/ul/li/span[contains(text(), '" + self.playlist_name + "')]").click()
 
