@@ -7,4 +7,4 @@ from NameHandler import NameHandler
 # Update details as needed
 # print(asset_list)
 # ob = ChromeDriver.ChromeDriverAmazonMusic(True, "email", "pass", "Testing", asset_list)
-ob = ChromeDriver.ChromeDriverAmazonMusic(True, "8008814124", "Don'tYouDareAsk", "Testing")
+ob = ChromeDriver.ChromeDriverAmazonMusic(True, "email", "pass", "Testing")
