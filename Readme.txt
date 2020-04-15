@@ -5,16 +5,25 @@ Objective:
 
 What to run/driver:
 -   All of the selenium automation is in ChromeDriverAmazonMusic.py, run it via TestDriver.py
--   Ensure the version of the Chrome browser and the ChromeDrivers match, download the file/update as needed.
--   Update user/pass for local testing *only*.
+    Ensure the version of the Chrome browser and the ChromeDrivers match, download the file/update as needed.
+    Update user/pass for local testing *only*.
+    
+-   The Name/Dir handlers can be tested via TestNames.py
 
 
 TODO
 -   Refactor find_assets(), too big too messy already. At least the annoying exceptions are out of the way. ¯\_(ツ)_/¯
--   Improve filename modules.
+    Make the Xpaths less strict.
 -   Work on a better/less strict matching/comparison approach, incase the service doesn't yield the exact asset.
+    Have a seperate module for the same logic.
+-   Ensure DirHandler can handle paths across both supported OS.
+
 
 STATUS
+
+----15-04-2020 22:50:00
+-   Added Metadata handling which serves as the primary source of artist/title info.
+
 
 ----12-04-2020 21:50:00
 -   Handled the case for "No Results" for an asset.
