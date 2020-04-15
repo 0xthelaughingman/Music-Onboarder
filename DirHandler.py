@@ -12,7 +12,7 @@ class DirHandler:
         for file in os.listdir(self.path):
             if file.endswith(".mp3") or file.endswith(".mp4"):
                 file = file.replace("_", " ")
-                self.file_list.append(file)
+                self.file_list.append(self.path + "\\" + file)
 
     def get_files(self):
         self.set_files()
