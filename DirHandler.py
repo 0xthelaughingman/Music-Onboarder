@@ -23,7 +23,7 @@ class DirHandler(object):
         return os.path.isdir(path)
     
     def __is_media(self, path):
-        return path.endswith("py") or path.endswith(".mp4")
+        return path.endswith(".mp3") or path.endswith(".mp4")
     
     def __is_valid_path(self, path):
         return os.path.exists(path)
