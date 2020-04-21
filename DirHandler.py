@@ -1,24 +1,40 @@
 import os
 
 
-class DirHandler:
-    path = ""
-    file_list = []
+class DirHandler(object):
+    def __init__(self, path):
+        self.__midea_files = []
+        if (self.__is_valid_path(path)):
+            self.__search_midea_files(path)
 
-    def __init__(self,  dir_path):
-        self.path = dir_path
+    def __search_midea_files(self, path):
+        if(self.__is_midea(path)):
+            self.__midea_files.append(path)
+            return
 
-    def set_files(self):
-        for file in os.listdir(self.path):
-            if file.endswith(".mp3") or file.endswith(".mp4"):
-                file = file.replace("_", " ")
-                self.file_list.append(self.path + "\\" + file)
+        if(not self.__is_dir(path)):
+            return
+        
+        dir_items = os.listdir(path)
+        for item in dir_items:
+            self.__search_midea_files("%s/%s" %(path,item))
+
+    def __is_dir(self, path):
+        return os.path.isdir(path)
+    
+    def __is_midea(self, path):
+        return path.endswith("mp3") or path.endswith(".mp4")
+    
+    def __is_valid_path(self, path):
+        return os.path.exists(path)
 
     def get_files(self):
-        self.set_files()
-        return self.file_list
+        return self.__midea_files
 
 
 if __name__ == "__main__":
-    ob = DirHandler("path")
-    print(ob.get_files())
+    midea_files = DirHandler("path").get_files()
+    counter = 0;
+    for file in midea_files:
+        counter += 1
+        print("%06d - %s" %(counter, file))
