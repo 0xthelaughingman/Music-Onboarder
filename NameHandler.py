@@ -41,7 +41,7 @@ class NameHandler:
 
     def get_file_name(self, filepath):
 
-        file_name = filepath.split("\\")
+        file_name = filepath.split("/")
         # print(file_name)
         file_name = file_name[len(file_name)-1]
         match = re.search(self.re_pattern, file_name)
@@ -53,12 +53,12 @@ class NameHandler:
         if match2:
             return [file_quality[2], match2.group("file_name").strip().lower(), None]
 
-        return [file_quality[3], file_name]
+        return [file_quality[3], "BAD FILE :: " + file_name]
 
     # Here after, we want the file data to be immutable!
     def clean_strings(self, data):
         # print(data)
-        re_urls = "\[?\(?[a-z0-9]+([\-_\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?\)?\]??"
+        re_urls = "\[?\(?[a-z0-9]+([\-_\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?\)?\]?"
         re_bitrates = "[\(\[]?\d*\s*kbps[\)\]]?"
         re_vid_keywords = "[\(\[]?\w+ video[\)\]]?|\d+p"
 
