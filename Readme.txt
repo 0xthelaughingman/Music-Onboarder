@@ -12,14 +12,17 @@ What to run/driver:
 
 
 TODO
--   Refactor find_assets(), too big too messy already. At least the annoying exceptions are out of the way. ¯\_(ツ)_/¯
-    Make the Xpaths less strict.
--   Work on a better/less strict matching/comparison approach, incase the service doesn't yield the exact asset.
-    Have a seperate module for the same logic.
 -   Ensure DirHandler can handle paths across both supported OS.
+-   Try and Support Spotify : )
 
 
 STATUS
+
+----26-04-2020 00:44:00
+-   Added the FuzzyMatcher Utility module.
+-   Overall AmazonMusic driver's reliability increased
+-   Improved DirHandler
+
 
 ----15-04-2020 22:50:00
 -   Added Metadata handling which serves as the primary source of artist/title info.
