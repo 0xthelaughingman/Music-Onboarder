@@ -61,7 +61,9 @@ class NameHandler:
         re_urls = "\[?\(?[a-z0-9]+([\-_\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?\)?\]?"
         re_bitrates = "[\(\[]?\d*\s*kbps[\)\]]?"
         re_vid_keywords = "[\(\[]?\w+ video[\)\]]?|\d+p"
-
+        re_feats = "ft\.|featuring\."
+        re_brackets_etc = "\(|\[|\]|\)"
+        re_spaces = "\s\s+"
         # No hope for this file!
         if data[0] == 0:
             return tuple(data)
@@ -71,7 +73,10 @@ class NameHandler:
                 data[n] = re.sub(re_urls, "", data[n])
                 data[n] = re.sub(re_bitrates, "", data[n])
                 data[n] = re.sub(re_vid_keywords, "", data[n])
-                data[n] =data[n].strip()
+                data[n] = re.sub(re_feats, "feat.", data[n])
+                data[n] = re.sub(re_brackets_etc, " ", data[n])
+                data[n] = re.sub(re_spaces, " ", data[n])
+                data[n] = data[n].strip()
         # print(tuple(data))
         return tuple(data)
 
