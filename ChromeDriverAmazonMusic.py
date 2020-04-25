@@ -15,7 +15,8 @@ class ChromeDriverAmazonMusic:
     driver = None
     playlist_name = None
     asset_list = None
-    status = None
+    status_matched = None
+    status_failed = None
 
     def __init__(self, test_mode=False, email=None, password=None, playlist=None, asset_list=None):
 
@@ -44,7 +45,8 @@ class ChromeDriverAmazonMusic:
 
         self.setup_playlist(playlist)
         self.asset_list = asset_list
-        self.status =[]
+        self.status_matched = []
+        self.status_failed = []
         self.find_assets(self.asset_list)
         self.driver.quit()
 
@@ -64,8 +66,7 @@ class ChromeDriverAmazonMusic:
 
         # Making sure with move_to that the element is visible/interactable
         button = self.driver.find_element_by_xpath(
-            "//*[@id=\"dragonflyView\"]/div/div[2]/div[2]/section/section[3]/div[2]/div/div[1]/div[" + str(
-                target_tile) + "]/div[3]/span[3]")
+            "//*[@class=\"card trackCard\"]/div[2]/div/div[1]/div[" + str(target_tile) + "]/div[3]/span[3]")
         ActionChains(self.driver).move_to_element(button).click(button).perform()
         self.driver.find_element_by_xpath("//*[@id=\"contextMenuContainer\"]/section/ul/li[2]/div").click()
         self.driver.find_element_by_xpath(
@@ -83,7 +84,7 @@ class ChromeDriverAmazonMusic:
         self.driver.find_element_by_xpath("//*[@id=\"dragonflyTransport\"]/div/div[1]/div/button").click()
 
         results = self.driver.find_elements_by_xpath(
-            "//*[@id=\"dragonflyView\"]/div/div[2]/div[2]/section/section[3]/div[2]/div/div[1]/div")
+            "//*[@class=\"card trackCard\"]/div[2]/div/div[1]/div")
 
         return results
 
@@ -100,7 +101,7 @@ class ChromeDriverAmazonMusic:
         for asset in asset_list:
             asset_filetype = asset[0]
             if asset_filetype == 0:
-                self.status.append("FAILED :: ")
+                self.status_failed.append("FILE FAILED=" +str(asset))
                 continue
             asset_artist = asset[1]
             asset_title = asset[2]
@@ -109,7 +110,7 @@ class ChromeDriverAmazonMusic:
 
             # Expected to handle an exception for this case...but this seems to work somehow...
             if len(results) == 0:
-                self.status.append("NO RESULTS=" + str(asset))
+                self.status_failed.append("NO RESULTS=" + str(asset))
                 continue
 
             # iterate result tiles and match, max attempts = 5
@@ -118,12 +119,12 @@ class ChromeDriverAmazonMusic:
             target_tile = 0
             for i in range(1, min(len(results), 5)):
                 tile_song = self.driver.find_element_by_xpath(
-                    "//*[@id=\"dragonflyView\"]/div/div[2]/div[2]/section/section[3]/div[2]/div/div[1]/div[" + str(i) + "]/div[2]/div[1]").get_attribute("title").lower()
-
+                    "//*[@class=\"card trackCard\"]/div[2]/div/div[1]/div[" + str(i) + "]/div[2]/div[1]")\
+                    .get_attribute("title").lower()
                 tile_artist = self.driver.find_element_by_xpath(
-                    "//*[@id=\"dragonflyView\"]/div/div[2]/div[2]/section/section[3]/div[2]/div/div[1]/div[" +
-                    str(i) + "]/div[2]/div[2]").get_attribute("title").lower()
-                print(asset_title, asset_artist, "VS", tile_song, tile_artist)
+                    "//*[@class=\"card trackCard\"]/div[2]/div/div[1]/div[" + str(i) + "]/div[2]/div[2]")\
+                    .get_attribute("title").lower()
+                #print(asset_title, asset_artist, "VS", tile_song, tile_artist)
 
                 # Match condition, needs a proper handler class with advanced logic/fuzzy....
                 current_factor = FuzzyMatcher.get_match_factor(asset_filetype, asset_artist, asset_title, tile_artist,tile_song)
@@ -138,14 +139,28 @@ class ChromeDriverAmazonMusic:
             if found == 1:
                 self.add_tile_asset(target_tile)
                 time.sleep(5)
-                self.status.append("MATCH SUCCESS=" + str(asset) + " | " + "MATCH FACTOR=" + str(max_factor))
+                self.status_matched.append("MATCH SUCCESS=" + str(asset) + " | " + "MATCH FACTOR=" + str(max_factor))
             else:
-                self.status.append("FAILED TO MATCH=" + str(asset))
+                self.status_failed.append("FAILED TO MATCH=" + str(asset))
 
     def get_status(self):
-        return self.status
+        matched = len(self.status_matched)
+        failed = len(self.status_failed)
+        total = matched + failed
+        match_rate = round(matched/total * 100, 2)
+
+        log = []
+        summary = "Total=" + str(total) + ", Matches=" + str(matched) + ", Rate=" + str(match_rate) + ", Failures=" + str(failed)
+        log.append(summary)
+        for item in self.status_matched:
+            log.append(item)
+        for item in self.status_failed:
+            log.append(item)
+
+        return log
 
 
 if __name__ == "__main__":
     ob = ChromeDriverAmazonMusic(False, "Testing")
-    print(ob.status)
+    for item in ob.get_status():
+        print(item)

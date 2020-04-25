@@ -7,6 +7,7 @@ Testfile: test_FuzzyMatcher.py (pytest)
 
 
 class FuzzyMatcher(object):
+    # Thoroughly test your changes before tinkering with this method!
     @staticmethod
     def get_match_factor(file_type, file_artist, file_title, serv_artist, serv_title):
         if file_type < 2 or file_artist == file_title:
