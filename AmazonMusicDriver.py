@@ -1,34 +1,33 @@
+from DriverBase import DriverBase
 import re
 import sys
 import time
-
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from FuzzyMatcher import *
+from FuzzyMatcher import FuzzyMatcher
 
 
-class ChromeDriverAmazonMusic:
-    driver = None
-    playlist_name = None
-    asset_list = None
-    status_matched = None
-    status_failed = None
+class AmazonMusicDriver(DriverBase):
 
     def __init__(self, test_mode=False, email=None, password=None, playlist=None, asset_list=None):
+        super(AmazonMusicDriver, self).__init__()
+        self.login(test_mode, email, password)
+        self.setup_playlist(playlist)
+        self.asset_list = asset_list
+        self.status_matched = []
+        self.status_failed = []
+        self.find_assets(self.asset_list)
+        self.driver.quit()
 
-        # Only supporting win/Mac OS X
-        if sys.platform == "win32":
-            self.driver = webdriver.Chrome('./webdriver/chromedriver.exe')
-        else:
-            self.driver = webdriver.Chrome('./webdriver/chromedriver_mac64')
+    def login(self, test_mode, email, password):
         # Primary page should be 'music.amazon.com', '.in' just to ease testing, otherwise 2 hops of log-ins
-        self.driver.implicitly_wait(10)
         self.driver.get('https://music.amazon.in/')
-        if test_mode is False:
+
+        if test_mode is False and (email is None or password is None):
             print("Please Sign in to the service.\n")
             while True:
                 res = input("Press y/Y to continue after sign-in...\n")
@@ -37,18 +36,11 @@ class ChromeDriverAmazonMusic:
         else:
             self.password = password
             self.email = email
-            self.driver.find_element_by_xpath("//*[@id=\"dialogBoxView\"]/section/section/section[2]/button[2]").click()
-            self.driver.find_element_by_xpath("//*[@id=\"contextMenu\"]/li[1]/a").click()
+            self.move_and_click("//*[@id=\"dialogBoxView\"]/section/section/section[2]/button[2]", True)
+            self.move_and_click("//*[@id=\"contextMenu\"]/li[1]/a", True)
             self.driver.find_element_by_xpath("//*[@id=\"ap_email\"]").send_keys(self.email)
             self.driver.find_element_by_xpath("//*[@id=\"ap_password\"]").send_keys(self.password)
-            self.driver.find_element_by_xpath("//*[@id=\"signInSubmit\"]").click()
-
-        self.setup_playlist(playlist)
-        self.asset_list = asset_list
-        self.status_matched = []
-        self.status_failed = []
-        self.find_assets(self.asset_list)
-        self.driver.quit()
+            self.move_and_click("//*[@id=\"signInSubmit\"]", True)
 
     def setup_playlist(self, playlist):
         if playlist is None:
@@ -56,21 +48,20 @@ class ChromeDriverAmazonMusic:
         else:
             self.playlist_name = playlist
         time.sleep(3)
-        self.driver.find_element_by_xpath("//*[@id=\"newPlaylist\"]").click()
+        self.move_and_click("//*[@id=\"newPlaylist\"]", True)
         self.driver.find_element_by_xpath("//*[@id=\"newPlaylistName\"]").send_keys(self.playlist_name)
-        self.driver.find_element_by_xpath("//*[@id=\"savePlaylistDialog\"]/a").click()
+        self.move_and_click("//*[@id=\"savePlaylistDialog\"]/a", True)
 
     # Method to handle the adding of selected tile asset to playlist
     def add_tile_asset(self, target_tile: int):
         self.driver.find_element_by_xpath("//*[@id=\"dragonflyView\"]/div/div[1]/div/h1").click()
 
         # Making sure with move_to that the element is visible/interactable
-        button = self.driver.find_element_by_xpath(
-            "//*[@class=\"card trackCard\"]/div[2]/div/div[1]/div[" + str(target_tile) + "]/div[3]/span[3]")
-        ActionChains(self.driver).move_to_element(button).click(button).perform()
-        self.driver.find_element_by_xpath("//*[@id=\"contextMenuContainer\"]/section/ul/li[2]/div").click()
-        self.driver.find_element_by_xpath(
-            "//dl/dd/ul/li/span[contains(text(), '" + self.playlist_name + "')]").click()
+        self.move_and_click(
+            "//*[@class=\"card trackCard\"]/div[2]/div/div[1]/div[" + str(target_tile) + "]/div[3]/span[3]", True)
+
+        self.move_and_click("//*[@id=\"contextMenuContainer\"]/section/ul/li[2]/div", True)
+        self.move_and_click("//dl/dd/ul/li/span[contains(text(), '" + self.playlist_name + "')]", True)
 
     # Method for handling the searching of an asset, returns the number of tiles available after the search
     def search_asset(self, artist, title):
@@ -80,8 +71,8 @@ class ChromeDriverAmazonMusic:
         search_area.clear()
         search_area.send_keys(artist + " " + title)
 
-        self.driver.find_element_by_xpath("//*[@id=\"dragonflyTransport\"]/div/div[1]/div/button").click()
-        self.driver.find_element_by_xpath("//*[@id=\"dragonflyTransport\"]/div/div[1]/div/button").click()
+        self.move_and_click("//*[@id=\"dragonflyTransport\"]/div/div[1]/div/button", True)
+        self.move_and_click("//*[@id=\"dragonflyTransport\"]/div/div[1]/div/button", True)
 
         results = self.driver.find_elements_by_xpath(
             "//*[@class=\"card trackCard\"]/div[2]/div/div[1]/div")
@@ -124,7 +115,7 @@ class ChromeDriverAmazonMusic:
                 tile_artist = self.driver.find_element_by_xpath(
                     "//*[@class=\"card trackCard\"]/div[2]/div/div[1]/div[" + str(i) + "]/div[2]/div[2]")\
                     .get_attribute("title").lower()
-                #print(asset_title, asset_artist, "VS", tile_song, tile_artist)
+                # print(asset_title, asset_artist, "VS", tile_song, tile_artist)
 
                 # Match condition, needs a proper handler class with advanced logic/fuzzy....
                 current_factor = FuzzyMatcher.get_match_factor(asset_filetype, asset_artist, asset_title, tile_artist,tile_song)
@@ -144,23 +135,12 @@ class ChromeDriverAmazonMusic:
                 self.status_failed.append("FAILED TO MATCH=" + str(asset))
 
     def get_status(self):
-        matched = len(self.status_matched)
-        failed = len(self.status_failed)
-        total = matched + failed
-        match_rate = round(matched/total * 100, 2)
-
-        log = []
-        summary = "Total=" + str(total) + ", Matches=" + str(matched) + ", Rate=" + str(match_rate) + ", Failures=" + str(failed)
-        log.append(summary)
-        for item in self.status_matched:
-            log.append(item)
-        for item in self.status_failed:
-            log.append(item)
-
+        log = super(AmazonMusicDriver, self).get_status()
+        log.append("Driver:" + self.__class__.__name__)
         return log
 
 
 if __name__ == "__main__":
-    ob = ChromeDriverAmazonMusic(False, "Testing")
+    ob = AmazonMusicDriver(False)
     for item in ob.get_status():
         print(item)

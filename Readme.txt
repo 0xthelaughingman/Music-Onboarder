@@ -4,7 +4,7 @@ Objective:
 -   Project Prefs: Python 3.8.2, IDE: PyCharm, the venv should auto resolve most of the dependencies.
 
 What to run/driver:
--   All of the selenium automation is in ChromeDriverAmazonMusic.py, run it via TestDriver.py
+-   All of the selenium automation is in Spotify/AmazonMusic's driver.py, run them via TestDriver.py
     Ensure the version of the Chrome browser and the ChromeDrivers match, download the file/update as needed.
     Update user/pass for local testing *only*.
     
@@ -12,11 +12,19 @@ What to run/driver:
 
 
 TODO
+-   Add the usecase of porting a playlist from one service to another. <<HIGH_PRIORITY>>
 -   Ensure DirHandler can handle paths across both supported OS.
--   Try and Support Spotify : )
+-   Test resilience of Spotify Driver.
+-   Add handling for the odd case ( FuzzyMatcher )
 
 
 STATUS
+
+----03-05-2020 19:20:00
+-   Added Driver for Spotify
+-   Minor improvements to implementations.
+
+
 
 ----26-04-2020 00:44:00
 -   Added the FuzzyMatcher Utility module.
