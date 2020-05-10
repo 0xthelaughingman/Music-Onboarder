@@ -1,15 +1,25 @@
-from AmazonMusicDriver import AmazonMusicDriver
-from SpotifyDriver import SpotifyDriver
-from DirHandler import DirHandler
-from NameHandler import NameHandler
+from source.AmazonMusicSetter import AmazonMusicSetter
+from source.AmazonMusicGetter import AmazonMusicGetter
+from source.DirHandler import DirHandler
+from source.NameHandler import NameHandler
+from source.SpotifySetter import SpotifySetter
+from source.SpotifyGetter import SpotifyGetter
 
 # file_names = DirHandler("path").get_files()
 # asset_list = NameHandler(file_names).get_pairs()
 # Update details as needed
 # print(asset_list)
-# ob = ChromeDriver.ChromeDriverAmazonMusic(True, "email", "pass", "Testing", asset_list)
-ob = AmazonMusicDriver(True, "email", "pass", "Testing")
-ob = SpotifyDriver(True, "email", "pass", "Testing")
+# ob = AmazonMusicSetter(True, "email", "pass", "Testing", asset_list)
+
+ob = AmazonMusicGetter("https://music.amazon.in/user-playlists/24c50364686646d29c50c237d7abf1f8i8n0?ref=dm_sh_5f15-f02c-7958-1c3b-b801b")
+ob = SpotifySetter(True, "email", "password", "ETE", ob.get_asset_list())
+
+
+'''
+ob = SpotifyGetter("https://open.spotify.com/playlist/7nrSuqa9SQ18XTgwFKD6gG?si=V3w4_rsgTNqTNDGxM4IKWw")
+ob = AmazonMusicSetter(True, "email", "password", "ETE", ob.get_asset_list())
+'''
+# ob = SpotifySetter(True, "email", "pass", "Testing")
 
 results = ob.get_status()
 for i in results:

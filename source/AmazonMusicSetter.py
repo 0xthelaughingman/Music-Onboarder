@@ -1,20 +1,13 @@
-from DriverBase import DriverBase
-import re
-import sys
+from source.DriverSetterBase import DriverSetterBase
 import time
-from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from FuzzyMatcher import FuzzyMatcher
+from source.FuzzyMatcher import FuzzyMatcher
 
 
-class AmazonMusicDriver(DriverBase):
+class AmazonMusicSetter(DriverSetterBase):
 
     def __init__(self, test_mode=False, email=None, password=None, playlist=None, asset_list=None):
-        super(AmazonMusicDriver, self).__init__()
+        super(AmazonMusicSetter, self).__init__()
         self.login(test_mode, email, password)
         self.setup_playlist(playlist)
         self.asset_list = asset_list
@@ -25,7 +18,7 @@ class AmazonMusicDriver(DriverBase):
 
     def login(self, test_mode, email, password):
         # Primary page should be 'music.amazon.com', '.in' just to ease testing, otherwise 2 hops of log-ins
-        self.driver.get('https://music.amazon.in/')
+        self.driver.get('https://music.amazon.in/home')
 
         if test_mode is False and (email is None or password is None):
             print("Please Sign in to the service.\n")
@@ -36,7 +29,10 @@ class AmazonMusicDriver(DriverBase):
         else:
             self.password = password
             self.email = email
+            # dismiss popup about preferences since we aren't logged in
             self.move_and_click("//*[@id=\"dialogBoxView\"]/section/section/section[2]/button[2]", True)
+            time.sleep(1)
+            #self.move_and_click("//*[@id=\"transportSignInView\"]/div", True)
             self.move_and_click("//*[@id=\"contextMenu\"]/li[1]/a", True)
             self.driver.find_element_by_xpath("//*[@id=\"ap_email\"]").send_keys(self.email)
             self.driver.find_element_by_xpath("//*[@id=\"ap_password\"]").send_keys(self.password)
@@ -61,6 +57,7 @@ class AmazonMusicDriver(DriverBase):
             "//*[@class=\"card trackCard\"]/div[2]/div/div[1]/div[" + str(target_tile) + "]/div[3]/span[3]", True)
 
         self.move_and_click("//*[@id=\"contextMenuContainer\"]/section/ul/li[2]/div", True)
+
         self.move_and_click("//dl/dd/ul/li/span[contains(text(), '" + self.playlist_name + "')]", True)
 
     # Method for handling the searching of an asset, returns the number of tiles available after the search
@@ -108,39 +105,43 @@ class AmazonMusicDriver(DriverBase):
             found = 0
             max_factor = 0
             target_tile = 0
-            for i in range(1, min(len(results), 5)):
+            for i in range(1, min(len(results)+1, 5)):
                 tile_song = self.driver.find_element_by_xpath(
                     "//*[@class=\"card trackCard\"]/div[2]/div/div[1]/div[" + str(i) + "]/div[2]/div[1]")\
                     .get_attribute("title").lower()
                 tile_artist = self.driver.find_element_by_xpath(
                     "//*[@class=\"card trackCard\"]/div[2]/div/div[1]/div[" + str(i) + "]/div[2]/div[2]")\
                     .get_attribute("title").lower()
-                # print(asset_title, asset_artist, "VS", tile_song, tile_artist)
 
                 # Match condition, needs a proper handler class with advanced logic/fuzzy....
                 current_factor = FuzzyMatcher.get_match_factor(asset_filetype, asset_artist, asset_title, tile_artist,tile_song)
+                # print(asset_title, asset_artist, "VS", tile_song, tile_artist, current_factor)
                 if current_factor > max_factor:
                     target_tile = i
                     max_factor = current_factor
 
-                time.sleep(2)
             if max_factor != 0:
                 found = 1
 
             if found == 1:
-                self.add_tile_asset(target_tile)
-                time.sleep(5)
-                self.status_matched.append("MATCH SUCCESS=" + str(asset) + " | " + "MATCH FACTOR=" + str(max_factor))
+                try:
+                    self.add_tile_asset(target_tile)
+                    self.status_matched.append(
+                        "MATCH SUCCESS=" + str(asset) + " | " + "MATCH FACTOR=" + str(max_factor))
+                    time.sleep(1)
+                except Exception:
+                    self.status_failed.append("FAILED TO ADD DUE TO EXCEPTION=" + str(asset))
+
             else:
                 self.status_failed.append("FAILED TO MATCH=" + str(asset))
 
     def get_status(self):
-        log = super(AmazonMusicDriver, self).get_status()
-        log.append("Driver:" + self.__class__.__name__)
+        log = super(AmazonMusicSetter, self).get_status()
+        log = ["SetterName:" + self.__class__.__name__] + log
         return log
 
 
 if __name__ == "__main__":
-    ob = AmazonMusicDriver(False)
+    ob = AmazonMusicSetter(False)
     for item in ob.get_status():
         print(item)
