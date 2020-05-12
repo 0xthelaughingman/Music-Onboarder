@@ -1,4 +1,4 @@
-from FuzzyMatcher import *
+from source.FuzzyMatcher import FuzzyMatcher
 
 
 def test_get_match_factor():

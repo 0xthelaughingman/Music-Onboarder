@@ -1,20 +1,14 @@
-from DriverBase import DriverBase
-import re
-import sys
+from datetime import timedelta
+from source.DriverSetterBase import DriverSetterBase
 import time
-from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from FuzzyMatcher import *
+from source.FuzzyMatcher import FuzzyMatcher
 
 
-class SpotifyDriver(DriverBase):
+class SpotifySetter(DriverSetterBase):
 
     def __init__(self, test_mode=False, email=None, password=None, playlist=None, asset_list=None):
-        super(SpotifyDriver, self).__init__()
+        super(SpotifySetter, self).__init__()
         self.login(test_mode, email, password)
         self.setup_playlist(playlist)
         self.asset_list = asset_list
@@ -22,6 +16,7 @@ class SpotifyDriver(DriverBase):
         self.status_failed = []
         self.find_assets(self.asset_list)
         self.driver.quit()
+        self.exec_time = timedelta(seconds=time.time() - self.exec_time)
 
     def login(self, test_mode, email, password):
         self.driver.get('https://open.spotify.com/')
@@ -46,7 +41,7 @@ class SpotifyDriver(DriverBase):
         else:
             self.playlist_name = playlist
 
-        self.move_and_click("//*[@class=\"CreatePlaylistButton\"]", True)
+        self.move_and_click("//button/span[text()=\"Create Playlist\"]", True)
         self.driver.find_element_by_xpath(
             "//*[@id=\"main\"]/div/div[4]/div/div[1]/div/div/input").send_keys(self.playlist_name)
         self.move_and_click("//*[@id=\"main\"]/div/div[4]/div/div[2]/div[2]/button", True)
@@ -56,22 +51,22 @@ class SpotifyDriver(DriverBase):
 
         # Making sure with move_to to the Artist/Title name that the context menu is visible for that tile
         self.move_and_click(
-            "//*[@id=\"searchPage\"]/div/div/section[2]/div[2]/div[" + str(target_tile) + "]/div/div/div[3]/a",
+            "//*[@id=\"searchPage\"]/div/div/section[2]/div/div[2]/div[" + str(target_tile) + "]/div/div/div[3]/a",
             False)
 
         # click context menu
         self.context_click(
-            "//*[@id=\"searchPage\"]/div/div/section[2]/div[2]/div[" + str(target_tile) + "]/div/div/div[3]/a")
+            "//*[@id=\"searchPage\"]/div/div/section[2]/div/div[2]/div[" + str(target_tile) + "]/div/div/div[3]/a")
 
         # Add to playlist
         self.move_and_click("//*[@id=\"main\"]/div/nav[1]/div[4]", True)
         # iterate through playlists to find our playlist
-
+        time.sleep(1)
         playlists = results = self.driver.find_elements_by_xpath(
             "//*[@id=\"main\"]/div/div[4]/div/div[2]/div/div")
         # print("playlist len: ", len(playlists))
         playlist_loc = 0
-        for i in range(1, min(len(playlists), 5)):
+        for i in range(1, min(len(playlists)+1, 5)):
             cur_playlist = self.driver.find_element_by_xpath(
                 "//*[@id=\"main\"]/div/div[4]/div/div[2]/div/div[" + str(i) + "]/div/div/div/div/div/div[2]/div/div") \
                 .text
@@ -88,6 +83,7 @@ class SpotifyDriver(DriverBase):
     # Method for handling the searching of an asset, returns the number of tiles available after the search
     def search_asset(self, artist, title):
         # click the search button to transition to the search page
+        time.sleep(2)
         self.move_and_click("//*[@id=\"main\"]/div/div[3]/div[2]/nav/ul/li[2]/div/a/div/div[3]", True)
 
         search_area = self.driver.find_element_by_xpath(
@@ -100,7 +96,7 @@ class SpotifyDriver(DriverBase):
         # results auto populate after entering, no actions needed to search
 
         results = self.driver.find_elements_by_xpath(
-            "//*[@id=\"searchPage\"]/div/div/section[2]/div[2]/div")
+            "//*[@id=\"searchPage\"]/div/div/section[2]/div/div[2]/div/div")
 
         return results
 
@@ -123,7 +119,7 @@ class SpotifyDriver(DriverBase):
             asset_title = asset[2]
 
             results = self.search_asset(asset_artist, asset_title)
-            print(len(results))
+            # print(len(results))
             # Expected to handle an exception for this case...but this seems to work somehow...
             if len(results) == 0:
                 self.status_failed.append("NO RESULTS=" + str(asset))
@@ -133,39 +129,42 @@ class SpotifyDriver(DriverBase):
             found = 0
             max_factor = 0
             target_tile = 0
-            for i in range(1, min(len(results), 5)):
+            for i in range(1, min(len(results)+1, 5)):
                 tile_song = self.driver.find_element_by_xpath(
-                    "//*[@id=\"searchPage\"]/div/div/section[2]/div[2]/div[" + str(i) + "]/div/div/div[3]/a")\
+                    "//*[@id=\"searchPage\"]/div/div/section[2]/div/div[2]/div[" + str(i) + "]/div/div/div[3]/a")\
                     .text.lower()
                 tile_artist = self.driver.find_element_by_xpath(
-                    "//*[@id=\"searchPage\"]/div/div/section[2]/div[2]/div[" + str(i) + "]/div/div/div[3]/div/span/a")\
+                    "//*[@id=\"searchPage\"]/div/div/section[2]/div/div[2]/div[" + str(i) + "]/div/div/div[3]/div/span/a")\
                     .text.lower()
-                print(asset_title, asset_artist, "VS", tile_song, tile_artist)
-
                 # Match condition, needs a proper handler class with advanced logic/fuzzy....
-                current_factor = FuzzyMatcher.get_match_factor(asset_filetype, asset_artist, asset_title, tile_artist,tile_song)
+                current_factor = FuzzyMatcher.get_match_factor(asset_filetype, asset_artist, asset_title, tile_artist, tile_song)
+                # print(asset_title, asset_artist, "VS", tile_song, tile_artist, current_factor)
                 if current_factor > max_factor:
                     target_tile = i
                     max_factor = current_factor
 
-                time.sleep(2)
             if max_factor != 0:
                 found = 1
 
             if found == 1:
-                self.add_tile_asset(target_tile)
-                time.sleep(5)
-                self.status_matched.append("MATCH SUCCESS=" + str(asset) + " | " + "MATCH FACTOR=" + str(max_factor))
+                try:
+                    self.add_tile_asset(target_tile)
+                    self.status_matched.append(
+                        "MATCH SUCCESS=" + str(asset) + " | " + "MATCH FACTOR=" + str(max_factor))
+                    time.sleep(1)
+                except Exception as e:
+                    print(e)
+                    self.status_failed.append("FAILED TO ADD DUE TO EXCEPTION=" + str(asset))
             else:
                 self.status_failed.append("FAILED TO MATCH=" + str(asset))
 
     def get_status(self):
-        log = super(SpotifyDriver, self).get_status()
-        log.append("Driver:" + self.__class__.__name__)
+        log = super(SpotifySetter, self).get_status()
+        log = ["-"*40] + ["SetterName:" + self.__class__.__name__] + log
         return log
 
 
 if __name__ == "__main__":
-    ob = SpotifyDriver(False)
+    ob = SpotifySetter(False)
     for item in ob.get_status():
         print(item)

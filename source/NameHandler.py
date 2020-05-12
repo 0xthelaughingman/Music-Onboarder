@@ -19,7 +19,6 @@ class NameHandler:
     file_list = []
     asset_pair =[]
 
-
     def __init__(self, file_list):
         self.file_list = file_list
 
@@ -67,7 +66,9 @@ class NameHandler:
         # No hope for this file!
         if data[0] == 0:
             return tuple(data)
-
+        """
+        Maintain the hierarchy of the substitutions, else the strings might break.
+        """
         for n in range(1, len(data)):
             if data[n]:
                 data[n] = re.sub(re_urls, "", data[n])

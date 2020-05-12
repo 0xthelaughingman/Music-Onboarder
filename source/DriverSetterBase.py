@@ -1,5 +1,5 @@
 """
-Base class for all supported services' Drivers.
+Base class for all supported services' Setters.
 Important Notes:
 The drivers are currently designed to be able to run as standalone modules to assist in testing.
 sub class init prototype:(self, test_mode=False, email=None, password=None, playlist=None, asset_list=None)
@@ -18,21 +18,36 @@ as is expected to be run from the app once the prerequisites are already collect
 import sys
 from selenium import webdriver
 from selenium.webdriver import ActionChains
+import os
+import time
 
 
-class DriverBase:
+class DriverSetterBase:
     driver = None
     playlist_name = None
     asset_list = None
     status_matched = None
     status_failed = None
+    exec_time = None
 
     def __init__(self):
+        # Dynamic Path computation, handling execution from anywhere
+        self.exec_time = time.time()
+        cur_path = os.getcwd()
+        path_groups = cur_path.split("Music-Onboarder")
+        dyn_path = cur_path
+        rel_path = ""
+        if path_groups[1] != '':
+            counter = path_groups[1].count("\\")
+            for i in range(0, counter):
+                rel_path = rel_path + "../"
+            dyn_path = rel_path
+
         # Only supporting win/Mac OS X
         if sys.platform == "win32":
-            self.driver = webdriver.Chrome('./webdriver/chromedriver.exe')
+            self.driver = webdriver.Chrome(dyn_path + '/webdriver/chromedriver.exe')
         else:
-            self.driver = webdriver.Chrome('./webdriver/chromedriver_mac64')
+            self.driver = webdriver.Chrome(dyn_path + '/webdriver/chromedriver_mac64')
         self.driver.implicitly_wait(10)
 
     # Method for easy clicking/ just movement to the element as per the bool flag
@@ -76,7 +91,7 @@ class DriverBase:
             log.append(item)
         for item in self.status_failed:
             log.append(item)
-
+        log.append("Execution time= " + str(self.exec_time))
         return log
 
 

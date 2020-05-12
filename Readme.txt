@@ -13,12 +13,21 @@ What to run/driver:
 
 TODO
 -   Add the usecase of porting a playlist from one service to another. <<HIGH_PRIORITY>>
+    Drivers have been modified to support the usecase. Need to have an Orchestrator module to get an end to end
+    scenario handled
 -   Ensure DirHandler can handle paths across both supported OS.
--   Test resilience of Spotify Driver.
 -   Add handling for the odd case ( FuzzyMatcher )
 
 
 STATUS
+
+----10-05-2020 05:05:00
+-   Worked toward the usecase of porting a playlist from one service to another.
+-   Drivers now split into Getters(playlist fetch) and Setters(Creating a playlist)
+-   Refactored files
+
+
+
 
 ----03-05-2020 19:20:00
 -   Added Driver for Spotify

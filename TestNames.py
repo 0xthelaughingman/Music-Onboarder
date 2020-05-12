@@ -1,5 +1,5 @@
-from DirHandler import DirHandler
-from NameHandler import NameHandler
+from source.DirHandler import DirHandler
+from source.NameHandler import NameHandler
 
 
 file_names = DirHandler("path").get_files()
