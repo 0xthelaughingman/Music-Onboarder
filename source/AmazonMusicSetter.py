@@ -1,3 +1,4 @@
+from datetime import timedelta
 from source.DriverSetterBase import DriverSetterBase
 import time
 from selenium.webdriver.common.action_chains import ActionChains
@@ -15,6 +16,7 @@ class AmazonMusicSetter(DriverSetterBase):
         self.status_failed = []
         self.find_assets(self.asset_list)
         self.driver.quit()
+        self.exec_time = timedelta(seconds=time.time() - self.exec_time)
 
     def login(self, test_mode, email, password):
         # Primary page should be 'music.amazon.com', '.in' just to ease testing, otherwise 2 hops of log-ins
@@ -129,7 +131,8 @@ class AmazonMusicSetter(DriverSetterBase):
                     self.status_matched.append(
                         "MATCH SUCCESS=" + str(asset) + " | " + "MATCH FACTOR=" + str(max_factor))
                     time.sleep(1)
-                except Exception:
+                except Exception as e:
+                    print(e)
                     self.status_failed.append("FAILED TO ADD DUE TO EXCEPTION=" + str(asset))
 
             else:
@@ -137,7 +140,7 @@ class AmazonMusicSetter(DriverSetterBase):
 
     def get_status(self):
         log = super(AmazonMusicSetter, self).get_status()
-        log = ["SetterName:" + self.__class__.__name__] + log
+        log = ["-"*40] + ["SetterName:" + self.__class__.__name__] + log
         return log
 
 

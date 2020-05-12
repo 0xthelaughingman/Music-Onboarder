@@ -2,15 +2,18 @@ import sys
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 import os
-
+import re
+import time
 
 class DriverGetterBase:
     driver = None
     playlist_src = None
     asset_list = None
+    exec_time = None
 
     def __init__(self):
         # Dynamic Path computation, handling execution from anywhere
+        self.exec_time = time.time()
         cur_path = os.getcwd()
         path_groups = cur_path.split("Music-Onboarder")
         dyn_path = cur_path
@@ -40,6 +43,26 @@ class DriverGetterBase:
         element = self.driver.find_element_by_xpath(xpath)
         ActionChains(self.driver).move_to_element(element).context_click().perform()
 
+    """
+    Normalise strings in between services, as Explicit/Featuring substrings/tags
+    differ from service to service.
+    
+    Maintain the hierarchy of the substitutions, else the strings might break.
+    """
+    @staticmethod
+    def string_normalizer(asset: str):
+        re_feats = "ft\.|featuring\.|feat\."
+        re_explicits = "\[e\]|explicit"
+        re_brackets_etc = "\(|\[|\]|\)"
+        re_spaces = "\s\s+"
+        asset = re.sub(re_feats, "", asset)
+        asset = re.sub(re_explicits, "", asset)
+        asset = re.sub(re_brackets_etc, "", asset)
+        asset = re.sub(re_feats, " ", asset)
+        asset = re.sub(re_spaces, " ", asset)
+
+        return asset
+
     def get_status(self):
         total = len(self.asset_list)
         log = []
@@ -47,6 +70,7 @@ class DriverGetterBase:
         log.append(summary)
         for item in self.asset_list:
             log.append(item)
+        log.append("Execution time= " + str(self.exec_time))
 
         return log
 

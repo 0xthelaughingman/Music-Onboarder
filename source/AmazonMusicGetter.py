@@ -1,3 +1,4 @@
+from datetime import timedelta
 from source.DriverGetterBase import DriverGetterBase
 import time
 import re
@@ -12,6 +13,7 @@ class AmazonMusicGetter(DriverGetterBase):
         self.driver.get(playlist_url)
         self.find_assets()
         self.driver.quit()
+        self.exec_time = timedelta(seconds=time.time() - self.exec_time)
 
     """
     Amazon has an interesting way to render their playlist items, probably to optimise performance.
@@ -25,17 +27,18 @@ class AmazonMusicGetter(DriverGetterBase):
         self.move_and_click("//*[@id=\"dialogBoxView\"]/section/section/section[2]/button[2]", True)
         time.sleep(2)
         description = self.driver.find_element_by_xpath("//*[@id=\"dragonflyView\"]/div/div/div/div[2]/div[3]").get_attribute("innerHTML")
-        match = re.search("(?P<count>\d+)\s*songs",description)
+        match = re.search("(?P<count>\d+)\s*songs", description)
         total_songs = 0
         if match:
             total_songs = int(match.group("count"))
-
+        # print(total_songs)
         total_tables = self.driver.find_elements_by_xpath(
             "//section[@class=\"playlistDetailsList noSelect\"]/div/div/table")
         # print(len(total_tables))
         cur_song_counter = 0
 
-        # NEEDS WAY MORE TESTING, lots of possible cases
+        # NEEDS WAY MORE TESTING, lots of possible cases.
+        # One of the current issues, the loop may start before the description is rendered, leading to total_songs = 0
         while True:
             for table in range(1, len(total_tables)+1):
                 table_results = self.driver.find_elements_by_xpath(
@@ -55,16 +58,19 @@ class AmazonMusicGetter(DriverGetterBase):
                     tile_artist = self.driver.find_element_by_xpath(
                         "//section[@class=\"playlistDetailsList noSelect\"]/div/div/table[" + str(table) + "]/tr[" + str(i) + "]/td[4]/span[1]/span") \
                         .get_attribute("title").lower()
-                    print(table, i, tile_artist, tile_song)
+                    # print(table, i, tile_artist, tile_song)
+                    tile_song = self.string_normalizer(tile_song)
+                    tile_artist = self.string_normalizer(tile_artist)
+
                     self.asset_list.append(tuple([3, tile_artist, tile_song, "Amazon Playlist"]))
                     cur_song_counter += 1
-                    if total_songs == cur_song_counter:
+                    if cur_song_counter >= total_songs:
                         return
         return
 
     def get_status(self):
         log = super(AmazonMusicGetter, self).get_status()
-        log = ["GetterName:" + self.__class__.__name__] + log
+        log = ["-"*40] + ["GetterName:" + self.__class__.__name__] + log
         return log
 
     def get_asset_list(self):

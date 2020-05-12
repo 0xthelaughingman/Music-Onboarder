@@ -1,3 +1,6 @@
+import time
+from datetime import timedelta
+
 from source.DriverGetterBase import DriverGetterBase
 
 
@@ -10,6 +13,7 @@ class SpotifyGetter(DriverGetterBase):
         self.driver.get(playlist_url)
         self.find_assets()
         self.driver.quit()
+        self.exec_time = timedelta(seconds=time.time() - self.exec_time)
 
     def find_assets(self):
         results = self.driver.find_elements_by_xpath(
@@ -25,13 +29,15 @@ class SpotifyGetter(DriverGetterBase):
             tile_artist = self.driver.find_element_by_xpath(
                 "//ol[@class=\"tracklist\"]/div[" + str(i) + "]/div/li/div[2]/div/div[2]/span/span/span/a") \
                 .text.lower()
+            tile_song = self.string_normalizer(tile_song)
+            tile_artist = self.string_normalizer(tile_artist)
             self.asset_list.append(tuple([3, tile_artist, tile_song, "Spotify Playlist"]))
 
         return
 
     def get_status(self):
         log = super(SpotifyGetter, self).get_status()
-        log = ["GetterName:" + self.__class__.__name__] + log
+        log = ["-"*40] + ["GetterName:" + self.__class__.__name__] + log
         return log
 
     def get_asset_list(self):

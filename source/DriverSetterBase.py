@@ -19,6 +19,7 @@ import sys
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 import os
+import time
 
 
 class DriverSetterBase:
@@ -27,9 +28,11 @@ class DriverSetterBase:
     asset_list = None
     status_matched = None
     status_failed = None
+    exec_time = None
 
     def __init__(self):
         # Dynamic Path computation, handling execution from anywhere
+        self.exec_time = time.time()
         cur_path = os.getcwd()
         path_groups = cur_path.split("Music-Onboarder")
         dyn_path = cur_path
@@ -88,7 +91,7 @@ class DriverSetterBase:
             log.append(item)
         for item in self.status_failed:
             log.append(item)
-
+        log.append("Execution time= " + str(self.exec_time))
         return log
 
 
