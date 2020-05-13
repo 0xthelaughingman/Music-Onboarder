@@ -7,21 +7,22 @@ from source.FuzzyMatcher import FuzzyMatcher
 
 class SpotifySetter(DriverSetterBase):
 
-    def __init__(self, test_mode=False, email=None, password=None, playlist=None, asset_list=None):
+    def __init__(self, test_mode=False, asset_list=list, email=None, password=None, playlist_name=None):
         super(SpotifySetter, self).__init__()
         self.login(test_mode, email, password)
-        self.setup_playlist(playlist)
+        self.setup_playlist(playlist_name)
         self.asset_list = asset_list
         self.status_matched = []
         self.status_failed = []
         self.find_assets(self.asset_list)
         self.driver.quit()
         self.exec_time = timedelta(seconds=time.time() - self.exec_time)
+        self.log_status()
 
     def login(self, test_mode, email, password):
         self.driver.get('https://open.spotify.com/')
 
-        if test_mode is False and (email is None or password is None):
+        if test_mode is False or (email is None or password is None):
             print("Please Sign in to the service.\n")
             while True:
                 res = input("Press y/Y to continue after sign-in...\n")
@@ -65,7 +66,9 @@ class SpotifySetter(DriverSetterBase):
         playlists = results = self.driver.find_elements_by_xpath(
             "//*[@id=\"main\"]/div/div[4]/div/div[2]/div/div")
         # print("playlist len: ", len(playlists))
-        playlist_loc = 0
+
+        # Leads to an exception at times as the playlist dialog never opens up at times...
+        playlist_loc = 1
         for i in range(1, min(len(playlists)+1, 5)):
             cur_playlist = self.driver.find_element_by_xpath(
                 "//*[@id=\"main\"]/div/div[4]/div/div[2]/div/div[" + str(i) + "]/div/div/div/div/div/div[2]/div/div") \
@@ -158,13 +161,7 @@ class SpotifySetter(DriverSetterBase):
             else:
                 self.status_failed.append("FAILED TO MATCH=" + str(asset))
 
-    def get_status(self):
-        log = super(SpotifySetter, self).get_status()
-        log = ["-"*40] + ["SetterName:" + self.__class__.__name__] + log
-        return log
-
 
 if __name__ == "__main__":
     ob = SpotifySetter(False)
-    for item in ob.get_status():
-        print(item)
+

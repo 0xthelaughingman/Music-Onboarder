@@ -1,16 +1,17 @@
 """
 Base class for all supported services' Setters.
 Important Notes:
+It expects an test_mode, asset_list(list of assets to be added in the playlist) to be a mandatory input
 The drivers are currently designed to be able to run as standalone modules to assist in testing.
-sub class init prototype:(self, test_mode=False, email=None, password=None, playlist=None, asset_list=None)
+sub class init prototype:(self, test_mode=False,  asset_list=list, email=None, password=None, playlist=None)
 
 As such, the sub class constructors are expected to allow the following legal usage/param combinations:
--(self, test_mode=False) -> For a mock user case, where the user inputs the required params.
+-(self, test_mode=False, asset_list=list) -> For a mock user case, where the user inputs the required params.
 
--(self, test_mode=True, email, password) ->Where the login is automated, playlist and assets
+-(self, test_mode=True, asset_list=list, email, password) ->Where the login is automated, playlist and assets
 are default test configs.
 
--(self, test_mode=False, email, password, playlist, asset_list) -> ETE case,
+-(self, test_mode=False, asset_list=list) -> ETE case,
 as is expected to be run from the app once the prerequisites are already collected in a separate module
 
 """
@@ -20,6 +21,11 @@ from selenium import webdriver
 from selenium.webdriver import ActionChains
 import os
 import time
+import logging
+from selenium.webdriver.remote.remote_connection import LOGGER
+from urllib3.connectionpool import log as urllibLogger
+urllibLogger.setLevel(logging.WARNING)
+LOGGER.setLevel(logging.WARNING)
 
 
 class DriverSetterBase:
@@ -29,10 +35,12 @@ class DriverSetterBase:
     status_matched = None
     status_failed = None
     exec_time = None
+    logger = None
 
     def __init__(self):
         # Dynamic Path computation, handling execution from anywhere
         self.exec_time = time.time()
+        self.logger = logging.getLogger()
         cur_path = os.getcwd()
         path_groups = cur_path.split("Music-Onboarder")
         dyn_path = cur_path
@@ -62,7 +70,6 @@ class DriverSetterBase:
         element = self.driver.find_element_by_xpath(xpath)
         ActionChains(self.driver).move_to_element(element).context_click().perform()
 
-
     def setup_playlist(self, playlist):
         return
 
@@ -78,20 +85,23 @@ class DriverSetterBase:
     def find_assets(self, asset_list):
         return
 
-    def get_status(self):
+    def log_status(self):
         matched = len(self.status_matched)
         failed = len(self.status_failed)
         total = matched + failed
         match_rate = round(matched/total * 100, 2)
 
-        log = []
-        summary = "Total=" + str(total) + ", Matches=" + str(matched) + ", Rate=" + str(match_rate) + ", Failures=" + str(failed)
-        log.append(summary)
+        total = len(self.asset_list)
+        self.logger.critical("-"*40)
+        self.logger.critical("SetterName:" + self.__class__.__name__)
+        self.logger.critical("Total=" + str(total) + ", Matches=" + str(matched) + ", Rate=" + str(match_rate) + ", Failures=" + str(failed))
+
         for item in self.status_matched:
-            log.append(item)
+            self.logger.critical(item)
         for item in self.status_failed:
-            log.append(item)
-        log.append("Execution time= " + str(self.exec_time))
-        return log
+            self.logger.critical(item)
+
+        self.logger.critical("Execution time= " + str(self.exec_time))
+
 
 

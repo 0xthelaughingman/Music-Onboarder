@@ -1,10 +1,10 @@
 import time
 from datetime import timedelta
-
 from source.DriverGetterBase import DriverGetterBase
 
 
 class SpotifyGetter(DriverGetterBase):
+
     def __init__(self, playlist_url):
         super(SpotifyGetter, self).__init__()
         self.asset_list = []
@@ -14,6 +14,7 @@ class SpotifyGetter(DriverGetterBase):
         self.find_assets()
         self.driver.quit()
         self.exec_time = timedelta(seconds=time.time() - self.exec_time)
+        self.log_status()
 
     def find_assets(self):
         results = self.driver.find_elements_by_xpath(
@@ -35,20 +36,8 @@ class SpotifyGetter(DriverGetterBase):
 
         return
 
-    def get_status(self):
-        log = super(SpotifyGetter, self).get_status()
-        log = ["-"*40] + ["GetterName:" + self.__class__.__name__] + log
-        return log
-
-    def get_asset_list(self):
-        return self.asset_list
-
 
 if __name__ == "__main__":
     ob = SpotifyGetter("https://open.spotify.com/playlist/2skhgmWPS9RicUbXYgpAKh?si=P_7Aq3lhQkS6TKNVWV7GBQ")
-
-    # logging
-    for item in ob.get_status():
-        print(item)
     # for passing onto next module
     ob.get_asset_list()

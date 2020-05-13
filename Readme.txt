@@ -4,29 +4,32 @@ Objective:
 -   Project Prefs: Python 3.8.2, IDE: PyCharm, the venv should auto resolve most of the dependencies.
 
 What to run/driver:
--   All of the selenium automation is in Spotify/AmazonMusic's driver.py, run them via TestDriver.py
+-   Run UserConfig.py to run the end to end scenario.
+-   All of the selenium automation is in the Getter/Setter drivers, run them via TestDriver.py
     Ensure the version of the Chrome browser and the ChromeDrivers match, download the file/update as needed.
     Update user/pass for local testing *only*.
-    
 -   The Name/Dir handlers can be tested via TestNames.py
 
 
 TODO
--   Add the usecase of porting a playlist from one service to another. <<HIGH_PRIORITY>>
-    Drivers have been modified to support the usecase. Need to have an Orchestrator module to get an end to end
-    scenario handled
 -   Ensure DirHandler can handle paths across both supported OS.
 -   Add handling for the odd case ( FuzzyMatcher )
-
+-   Ensure proper exception handling/logging.
 
 STATUS
+
+----13-05-2020 21:05:00
+-   Implemented Logger, need to add appropriate logs where necessary.
+-   Added UserConfig/Orchestrator modules for end-to-end execution.
+-   Refactored files
+
+
+
 
 ----10-05-2020 05:05:00
 -   Worked toward the usecase of porting a playlist from one service to another.
 -   Drivers now split into Getters(playlist fetch) and Setters(Creating a playlist)
 -   Refactored files
-
-
 
 
 ----03-05-2020 19:20:00

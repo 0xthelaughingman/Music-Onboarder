@@ -4,16 +4,25 @@ from selenium.webdriver import ActionChains
 import os
 import re
 import time
+import logging
+from source.utils.loggerHelper import LoggingHelper
+from selenium.webdriver.remote.remote_connection import LOGGER
+from urllib3.connectionpool import log as urllibLogger
+urllibLogger.setLevel(logging.WARNING)
+LOGGER.setLevel(logging.WARNING)
+
 
 class DriverGetterBase:
     driver = None
     playlist_src = None
     asset_list = None
     exec_time = None
+    logger = None
 
     def __init__(self):
         # Dynamic Path computation, handling execution from anywhere
         self.exec_time = time.time()
+        self.logger = logging.getLogger()
         cur_path = os.getcwd()
         path_groups = cur_path.split("Music-Onboarder")
         dyn_path = cur_path
@@ -63,15 +72,15 @@ class DriverGetterBase:
 
         return asset
 
-    def get_status(self):
+    def log_status(self):
         total = len(self.asset_list)
-        log = []
-        summary = "Total=" + str(total) + ", PlaylistSource=" + str(self.playlist_src)
-        log.append(summary)
+        self.logger.critical("-"*40)
+        self.logger.critical("GetterName:" + self.__class__.__name__)
+        self.logger.critical("Total=" + str(total) + ", PlaylistSource=" + str(self.playlist_src))
+
         for item in self.asset_list:
-            log.append(item)
-        log.append("Execution time= " + str(self.exec_time))
+            self.logger.critical(item)
+        self.logger.critical("Execution time= " + str(self.exec_time))
 
-        return log
-
-
+    def get_asset_list(self):
+        return self.asset_list

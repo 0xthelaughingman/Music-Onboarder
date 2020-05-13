@@ -7,22 +7,23 @@ from source.FuzzyMatcher import FuzzyMatcher
 
 class AmazonMusicSetter(DriverSetterBase):
 
-    def __init__(self, test_mode=False, email=None, password=None, playlist=None, asset_list=None):
+    def __init__(self, test_mode=False, asset_list=list, email=None, password=None, playlist_name=None):
         super(AmazonMusicSetter, self).__init__()
         self.login(test_mode, email, password)
-        self.setup_playlist(playlist)
+        self.setup_playlist(playlist_name)
         self.asset_list = asset_list
         self.status_matched = []
         self.status_failed = []
         self.find_assets(self.asset_list)
         self.driver.quit()
         self.exec_time = timedelta(seconds=time.time() - self.exec_time)
+        self.log_status()
 
     def login(self, test_mode, email, password):
         # Primary page should be 'music.amazon.com', '.in' just to ease testing, otherwise 2 hops of log-ins
         self.driver.get('https://music.amazon.in/home')
 
-        if test_mode is False and (email is None or password is None):
+        if test_mode is False or (email is None or password is None):
             print("Please Sign in to the service.\n")
             while True:
                 res = input("Press y/Y to continue after sign-in...\n")
@@ -138,13 +139,6 @@ class AmazonMusicSetter(DriverSetterBase):
             else:
                 self.status_failed.append("FAILED TO MATCH=" + str(asset))
 
-    def get_status(self):
-        log = super(AmazonMusicSetter, self).get_status()
-        log = ["-"*40] + ["SetterName:" + self.__class__.__name__] + log
-        return log
-
 
 if __name__ == "__main__":
     ob = AmazonMusicSetter(False)
-    for item in ob.get_status():
-        print(item)
