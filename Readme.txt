@@ -4,6 +4,7 @@ Objective:
 -   Project Prefs: Python 3.8.2, IDE: PyCharm, the venv should auto resolve most of the dependencies.
 
 What to run/driver:
+-   Run UserConfig.py to run the end to end scenario.
 -   All of the selenium automation is in the Getter/Setter drivers, run them via TestDriver.py
     Ensure the version of the Chrome browser and the ChromeDrivers match, download the file/update as needed.
     Update user/pass for local testing *only*.
