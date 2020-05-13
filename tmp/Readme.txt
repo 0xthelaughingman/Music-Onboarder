@@ -1,0 +1,1 @@
+Directory for storage of logs and other temporary files.
