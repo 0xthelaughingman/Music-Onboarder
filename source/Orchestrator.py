@@ -36,8 +36,6 @@ class Orchestrator:
 
         return
 
-        return
-
     def run_driver_getter(self):
 
         if self.src_type == "local directory":
