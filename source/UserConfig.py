@@ -1,11 +1,13 @@
 """
 Module to oversee the end to end flow of the conversion of the music assets as decided
 by the User.
+
 """
+
 from source.supported_configs import *
 from source.Orchestrator import Orchestrator
 
-1
+
 class UserConfig:
 
     def __init__(self):

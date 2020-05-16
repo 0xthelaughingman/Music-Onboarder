@@ -2,7 +2,9 @@
 The objective of this module is to yield a tuple containing info about:
 -Quality of the file and metadata.
 -Metadata such as the Artist and Title of the song, as available
+
 """
+
 import re
 from mutagen.easyid3 import EasyID3
 

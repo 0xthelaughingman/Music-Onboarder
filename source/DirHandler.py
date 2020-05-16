@@ -34,7 +34,7 @@ class DirHandler(object):
 
 if __name__ == "__main__":
     media_files = DirHandler("path").get_files()
-    counter = 0;
+    counter = 0
     for file in media_files:
         counter += 1
         print("%06d - %s" %(counter, file))

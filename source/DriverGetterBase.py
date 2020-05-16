@@ -1,3 +1,8 @@
+"""
+Base class for all supported services' Getters.
+
+"""
+
 import sys
 from selenium import webdriver
 from selenium.webdriver import ActionChains
@@ -5,7 +10,6 @@ import os
 import re
 import time
 import logging
-from source.utils.loggerHelper import LoggingHelper
 from selenium.webdriver.remote.remote_connection import LOGGER
 from urllib3.connectionpool import log as urllibLogger
 urllibLogger.setLevel(logging.WARNING)

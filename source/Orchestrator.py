@@ -1,15 +1,14 @@
 """
 Module to run the user's selected scenario.
+
 """
+
 from source.SpotifyGetter import SpotifyGetter
 from source.AmazonMusicGetter import AmazonMusicGetter
-
 from source.AmazonMusicSetter import AmazonMusicSetter
 from source.SpotifySetter import SpotifySetter
-
 from source.DirHandler import DirHandler
 from source.NameHandler import NameHandler
-
 from source.utils.loggerHelper import LoggingHelper
 
 
