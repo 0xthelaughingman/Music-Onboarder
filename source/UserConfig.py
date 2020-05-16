@@ -5,7 +5,7 @@ by the User.
 from source.supported_configs import *
 from source.Orchestrator import Orchestrator
 
-
+1
 class UserConfig:
 
     def __init__(self):
@@ -29,7 +29,7 @@ class UserConfig:
             print(str(i) + " : " + setters_list[i])
 
         dest_opt = int(input())
-        if source_opt < 0 or source_opt >= len(setters_list):
+        if dest_opt < 0 or dest_opt >= len(setters_list):
             print("Incorrect Option.")
             quit()
 

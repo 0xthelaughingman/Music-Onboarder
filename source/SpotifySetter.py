@@ -67,7 +67,7 @@ class SpotifySetter(DriverSetterBase):
             "//*[@id=\"main\"]/div/div[4]/div/div[2]/div/div")
         # print("playlist len: ", len(playlists))
 
-        # Leads to an exception at times as the playlist dialog never opens up at times...
+        # Leads to an exception at times as the playlist dialog never opens up ...
         playlist_loc = 1
         for i in range(1, min(len(playlists)+1, 5)):
             cur_playlist = self.driver.find_element_by_xpath(
@@ -86,7 +86,7 @@ class SpotifySetter(DriverSetterBase):
     # Method for handling the searching of an asset, returns the number of tiles available after the search
     def search_asset(self, artist, title):
         # click the search button to transition to the search page
-        time.sleep(2)
+        time.sleep(1)
         self.move_and_click("//*[@id=\"main\"]/div/div[3]/div[2]/nav/ul/li[2]/div/a/div/div[3]", True)
 
         search_area = self.driver.find_element_by_xpath(
@@ -129,7 +129,6 @@ class SpotifySetter(DriverSetterBase):
                 continue
 
             # iterate result tiles and match, max attempts = 5
-            found = 0
             max_factor = 0
             target_tile = 0
             for i in range(1, min(len(results)+1, 5)):
@@ -147,17 +146,20 @@ class SpotifySetter(DriverSetterBase):
                     max_factor = current_factor
 
             if max_factor != 0:
-                found = 1
+                # Tends to randomly fail for no reason, give upto 3 retries ( no such element exception ), log a failure only on the final try
+                for i in range(0, 3):
+                    try:
+                        self.add_tile_asset(target_tile)
+                        self.status_matched.append(
+                            "MATCH SUCCESS=" + str(asset) + " | " + "MATCH FACTOR=" + str(max_factor))
+                        time.sleep(1)
+                        break
+                    except Exception as e:
+                        self.logger.debug(e)
+                        if i == 2:
+                            self.logger.critical(e)
+                            self.status_failed.append("FAILED TO ADD DUE TO EXCEPTION=" + str(asset))
 
-            if found == 1:
-                try:
-                    self.add_tile_asset(target_tile)
-                    self.status_matched.append(
-                        "MATCH SUCCESS=" + str(asset) + " | " + "MATCH FACTOR=" + str(max_factor))
-                    time.sleep(1)
-                except Exception as e:
-                    print(e)
-                    self.status_failed.append("FAILED TO ADD DUE TO EXCEPTION=" + str(asset))
             else:
                 self.status_failed.append("FAILED TO MATCH=" + str(asset))
 

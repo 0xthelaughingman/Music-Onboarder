@@ -105,7 +105,6 @@ class AmazonMusicSetter(DriverSetterBase):
                 continue
 
             # iterate result tiles and match, max attempts = 5
-            found = 0
             max_factor = 0
             target_tile = 0
             for i in range(1, min(len(results)+1, 5)):
@@ -124,9 +123,6 @@ class AmazonMusicSetter(DriverSetterBase):
                     max_factor = current_factor
 
             if max_factor != 0:
-                found = 1
-
-            if found == 1:
                 try:
                     self.add_tile_asset(target_tile)
                     self.status_matched.append(
