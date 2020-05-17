@@ -92,11 +92,11 @@ class DriverSetterBase:
         total = len(self.asset_list)
         self.logger.critical("-"*40)
         self.logger.critical("SetterName:" + self.__class__.__name__)
-        self.logger.critical(str("Total=%d, Matches=%d, Rate=%2f, Failures=%d" % (total, matched, match_rate, failed)))
+        self.logger.critical(str("Total=%d, Matches=%d, Rate=%.2f, Failures=%d" % (total, matched, match_rate, failed)))
 
         for item in self.status_matched:
             self.logger.critical(item)
         for item in self.status_failed:
             self.logger.critical(item)
 
-        self.logger.critical(str("Execution time=%2f" % self.exec_time))
+        self.logger.critical(str("Execution time=%.2f" % self.exec_time))

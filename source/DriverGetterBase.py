@@ -84,7 +84,7 @@ class DriverGetterBase:
 
         for item in self.asset_list:
             self.logger.critical(item)
-        self.logger.critical(str("Execution time=%2f" % self.exec_time))
+        self.logger.critical(str("Execution time=%.2f" % self.exec_time))
 
     def get_asset_list(self):
         return self.asset_list
