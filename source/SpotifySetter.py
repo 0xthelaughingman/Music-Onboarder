@@ -149,7 +149,7 @@ class SpotifySetter(DriverSetterBase):
                     try:
                         self.add_tile_asset(target_tile)
                         self.status_matched.append(
-                            "MATCH SUCCESS=" + str(asset) + " | " + "MATCH FACTOR=" + str(max_factor))
+                            str("MATCH SUCCESS=%s, MATCH FACTOR=%s" % ( str(asset), str(max_factor))))
                         time.sleep(1)
                         break
                     except Exception as e:
