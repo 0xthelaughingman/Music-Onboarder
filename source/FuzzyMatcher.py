@@ -61,6 +61,3 @@ class FuzzyMatcher(object):
         if str1.find(str2) >= 0 or str2.find(str1) >= 0:
             return True
         return False
-
-
-

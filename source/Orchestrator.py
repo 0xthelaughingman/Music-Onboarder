@@ -10,7 +10,6 @@ from source.SpotifySetter import SpotifySetter
 from source.DirHandler import DirHandler
 from source.NameHandler import NameHandler
 from source.utils.loggerHelper import LoggingHelper
-import traceback
 
 
 class Orchestrator:
