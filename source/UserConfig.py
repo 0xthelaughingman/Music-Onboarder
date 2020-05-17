@@ -15,10 +15,11 @@ class UserConfig:
         for i in range(0, len(getters_list)):
             print(str(i) + " : " + getters_list[i])
 
-        source_opt = int(input())
-        if source_opt < 0 or source_opt >= len(getters_list):
-            print("Incorrect Option.")
-            quit()
+        while True:
+            source_opt = int(input())
+            if self.check_bounds(source_opt, getters_list) is True:
+                break
+            print("Incorrect Option. Retry")
 
         if source_opt > 0:
             setters_list.remove(getters_list[source_opt])
@@ -30,15 +31,21 @@ class UserConfig:
         for i in range(0, len(setters_list)):
             print(str(i) + " : " + setters_list[i])
 
-        dest_opt = int(input())
-        if dest_opt < 0 or dest_opt >= len(setters_list):
-            print("Incorrect Option.")
-            quit()
+        while True:
+            dest_opt = int(input())
+            if self.check_bounds(dest_opt, setters_list) is True:
+                break
+            print("Incorrect Option. Retry")
 
         src_type = getters_list[source_opt]
         dest_type = setters_list[dest_opt]
 
         Orchestrator(src_type, playlist_src, dest_type)
+
+    def check_bounds(self, choice: int, choices: list):
+        if choice < 0 or choice >= len(choices):
+            return False
+        return True
 
 
 if __name__ == "__main__":

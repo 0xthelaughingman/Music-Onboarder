@@ -36,7 +36,7 @@ class AmazonMusicGetter(DriverGetterBase):
         self.logger.debug("Total Songs :" + str(total_songs))
         total_tables = self.driver.find_elements_by_xpath(
             "//section[@class=\"playlistDetailsList noSelect\"]/div/div/table")
-        logging.debug("Total Tables :" + str(len(total_tables)))
+        self.logger.debug("Total Tables :" + str(len(total_tables)))
         cur_song_counter = 0
 
         # NEEDS WAY MORE TESTING, lots of possible cases.

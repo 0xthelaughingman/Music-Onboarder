@@ -7,7 +7,7 @@ from source.FuzzyMatcher import FuzzyMatcher
 
 class AmazonMusicSetter(DriverSetterBase):
 
-    def __init__(self, test_mode=False, asset_list=list, email=None, password=None, playlist_name=None):
+    def __init__(self, test_mode, asset_list, email=None, password=None, playlist_name=None):
         super(AmazonMusicSetter, self).__init__()
         self.login(test_mode, email, password)
         self.setup_playlist(playlist_name)
@@ -35,7 +35,7 @@ class AmazonMusicSetter(DriverSetterBase):
             # dismiss popup about preferences since we aren't logged in
             self.move_and_click("//*[@id=\"dialogBoxView\"]/section/section/section[2]/button[2]", True)
             time.sleep(1)
-            #self.move_and_click("//*[@id=\"transportSignInView\"]/div", True)
+            # self.move_and_click("//*[@id=\"transportSignInView\"]/div", True)
             self.move_and_click("//*[@id=\"contextMenu\"]/li[1]/a", True)
             self.driver.find_element_by_xpath("//*[@id=\"ap_email\"]").send_keys(self.email)
             self.driver.find_element_by_xpath("//*[@id=\"ap_password\"]").send_keys(self.password)
@@ -81,18 +81,11 @@ class AmazonMusicSetter(DriverSetterBase):
 
     # The method that iterates through assets, searching the asset and adding to playlist if found as a Match.
     def find_assets(self, asset_list):
-        # testing
-        if asset_list is None:
-            asset_list = [(3, "alan walker", "force"),
-                          (2, "siafugasudfgsidfg", "asudgausgdausydg"),
-                          (3,  "ahrix", "nova"),
-                          (3, "alan walker", "spectre")
-                          ]
 
         for asset in asset_list:
             asset_filetype = asset[0]
             if asset_filetype == 0:
-                self.status_failed.append("FILE FAILED=" +str(asset))
+                self.status_failed.append("FILE FAILED=" + str(asset))
                 continue
             asset_artist = asset[1]
             asset_title = asset[2]
@@ -116,8 +109,10 @@ class AmazonMusicSetter(DriverSetterBase):
                     .get_attribute("title").lower()
 
                 # Match condition, needs a proper handler class with advanced logic/fuzzy....
-                current_factor = FuzzyMatcher.get_match_factor(asset_filetype, asset_artist, asset_title, tile_artist,tile_song)
-                # print(asset_title, asset_artist, "VS", tile_song, tile_artist, current_factor)
+                current_factor = FuzzyMatcher.get_match_factor(asset_filetype, asset_artist,
+                                                               asset_title, tile_artist, tile_song)
+                self.logger.debug(str("Current match status : %s  %s VS %s  %s  , factor : %2f"
+                                      % (asset_title, asset_artist, tile_song, tile_artist,  current_factor)))
                 if current_factor > max_factor:
                     target_tile = i
                     max_factor = current_factor
@@ -129,7 +124,7 @@ class AmazonMusicSetter(DriverSetterBase):
                         "MATCH SUCCESS=" + str(asset) + " | " + "MATCH FACTOR=" + str(max_factor))
                     time.sleep(1)
                 except Exception as e:
-                    print(e)
+                    self.logger.exception(e)
                     self.status_failed.append("FAILED TO ADD DUE TO EXCEPTION=" + str(asset))
 
             else:
@@ -137,4 +132,11 @@ class AmazonMusicSetter(DriverSetterBase):
 
 
 if __name__ == "__main__":
-    ob = AmazonMusicSetter(False)
+    # testing
+    test_list = [
+                (3, "alan walker", "force"),
+                (2, "siafugasudfgsidfg", "asudgausgdausydg"),
+                (3,  "ahrix", "nova"),
+                (3, "alan walker", "spectre")
+                ]
+    ob = AmazonMusicSetter(False, test_list)

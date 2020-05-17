@@ -10,19 +10,24 @@ from source.SpotifySetter import SpotifySetter
 from source.DirHandler import DirHandler
 from source.NameHandler import NameHandler
 from source.utils.loggerHelper import LoggingHelper
+import traceback
 
 
 class Orchestrator:
 
     def __init__(self, src_type: str, src_url: str, dest_type: str):
-        LoggingHelper.setup_logger()
+        self.logger = LoggingHelper.setup_logger()
+        self.logger.critical(str("Starting config : [ src=%s , dest=%s, src_url=%s]"
+                                 % (src_type, dest_type, src_url)))
         self.src_type = src_type
         self.src_url = src_url
         self.dest_type = dest_type
 
-        self.run_driver_getter()
-        self.run_driver_setter()
-
+        try:
+            self.run_driver_getter()
+            self.run_driver_setter()
+        except Exception as e:
+            self.logger.exception(e)
         return
 
     def run_driver_setter(self):
