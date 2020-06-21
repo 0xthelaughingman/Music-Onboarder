@@ -1,3 +1,8 @@
+"""
+Base class for all supported services' Getters.
+
+"""
+
 import sys
 from selenium import webdriver
 from selenium.webdriver import ActionChains
@@ -5,7 +10,6 @@ import os
 import re
 import time
 import logging
-from source.utils.loggerHelper import LoggingHelper
 from selenium.webdriver.remote.remote_connection import LOGGER
 from urllib3.connectionpool import log as urllibLogger
 urllibLogger.setLevel(logging.WARNING)
@@ -76,11 +80,11 @@ class DriverGetterBase:
         total = len(self.asset_list)
         self.logger.critical("-"*40)
         self.logger.critical("GetterName:" + self.__class__.__name__)
-        self.logger.critical("Total=" + str(total) + ", PlaylistSource=" + str(self.playlist_src))
+        self.logger.critical("Total=%d, PlaylistSource=%s" % (total, self.playlist_src))
 
         for item in self.asset_list:
             self.logger.critical(item)
-        self.logger.critical("Execution time= " + str(self.exec_time))
+        self.logger.critical(str("Execution time=%.2f" % self.exec_time))
 
     def get_asset_list(self):
         return self.asset_list

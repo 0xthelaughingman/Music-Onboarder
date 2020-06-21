@@ -1,6 +1,6 @@
 Objective:
 -   Have a tool that can on-board majority of the users' offline(often Pirated!) songs to legitimate streaming/cloud services
--   Start with support for Amazon Music, add other platforms later on. Browser support: Chrome
+-   Start with support for Amazon Music, Spotify add other platforms later on. Browser support: Chrome
 -   Project Prefs: Python 3.8.2, IDE: PyCharm, the venv should auto resolve most of the dependencies.
 
 What to run/driver:

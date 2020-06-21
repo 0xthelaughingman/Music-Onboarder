@@ -7,7 +7,7 @@ from source.FuzzyMatcher import FuzzyMatcher
 
 class SpotifySetter(DriverSetterBase):
 
-    def __init__(self, test_mode=False, asset_list=list, email=None, password=None, playlist_name=None):
+    def __init__(self, test_mode: bool, asset_list: list, email=None, password=None, playlist_name=None):
         super(SpotifySetter, self).__init__()
         self.login(test_mode, email, password)
         self.setup_playlist(playlist_name)
@@ -63,11 +63,11 @@ class SpotifySetter(DriverSetterBase):
         self.move_and_click("//*[@id=\"main\"]/div/nav[1]/div[4]", True)
         # iterate through playlists to find our playlist
         time.sleep(1)
-        playlists = results = self.driver.find_elements_by_xpath(
+        playlists = self.driver.find_elements_by_xpath(
             "//*[@id=\"main\"]/div/div[4]/div/div[2]/div/div")
         # print("playlist len: ", len(playlists))
 
-        # Leads to an exception at times as the playlist dialog never opens up at times...
+        # Leads to an exception at times as the playlist dialog never opens up ...
         playlist_loc = 1
         for i in range(1, min(len(playlists)+1, 5)):
             cur_playlist = self.driver.find_element_by_xpath(
@@ -77,7 +77,7 @@ class SpotifySetter(DriverSetterBase):
             if cur_playlist == self.playlist_name:
                 playlist_loc = i
                 break
-        # print("playlist loc: ", playlist_loc)
+        self.logger.debug(str("playlist loc: %d" % playlist_loc))
         # Making sure playlist visible
         self.move_and_click(
             "//*[@id=\"main\"]/div/div[4]/div/div[2]/div/div[" + str(playlist_loc) + "]/div/div/div/div/div/div[1]/div",
@@ -86,7 +86,7 @@ class SpotifySetter(DriverSetterBase):
     # Method for handling the searching of an asset, returns the number of tiles available after the search
     def search_asset(self, artist, title):
         # click the search button to transition to the search page
-        time.sleep(2)
+        time.sleep(1)
         self.move_and_click("//*[@id=\"main\"]/div/div[3]/div[2]/nav/ul/li[2]/div/a/div/div[3]", True)
 
         search_area = self.driver.find_element_by_xpath(
@@ -105,63 +105,69 @@ class SpotifySetter(DriverSetterBase):
 
     # The method that iterates through assets, searching the asset and adding to playlist if found as a Match.
     def find_assets(self, asset_list):
-        # testing
-        if asset_list is None:
-            asset_list = [(3, "alan walker", "force"),
-                          (2, "siafugasudfgsidfg", "asudgausgdausydg"),
-                          (3,  "ahrix", "nova"),
-                          (3, "alan walker", "spectre")
-                          ]
 
         for asset in asset_list:
             asset_filetype = asset[0]
             if asset_filetype == 0:
-                self.status_failed.append("FILE FAILED=" +str(asset))
+                self.status_failed.append("FILE FAILED=" + str(asset))
                 continue
             asset_artist = asset[1]
             asset_title = asset[2]
 
             results = self.search_asset(asset_artist, asset_title)
-            # print(len(results))
+            self.logger.debug("Total Results: %d" % len(results))
             # Expected to handle an exception for this case...but this seems to work somehow...
             if len(results) == 0:
                 self.status_failed.append("NO RESULTS=" + str(asset))
                 continue
 
             # iterate result tiles and match, max attempts = 5
-            found = 0
             max_factor = 0
             target_tile = 0
             for i in range(1, min(len(results)+1, 5)):
                 tile_song = self.driver.find_element_by_xpath(
-                    "//*[@id=\"searchPage\"]/div/div/section[2]/div/div[2]/div[" + str(i) + "]/div/div/div[3]/a")\
+                    "//*[@id=\"searchPage\"]/div/div/section[2]/div/div[2]/div[" + str(i)
+                    + "]/div/div/div[3]/a")\
                     .text.lower()
                 tile_artist = self.driver.find_element_by_xpath(
-                    "//*[@id=\"searchPage\"]/div/div/section[2]/div/div[2]/div[" + str(i) + "]/div/div/div[3]/div/span/a")\
+                    "//*[@id=\"searchPage\"]/div/div/section[2]/div/div[2]/div[" + str(i)
+                    + "]/div/div/div[3]/div/span/a")\
                     .text.lower()
                 # Match condition, needs a proper handler class with advanced logic/fuzzy....
-                current_factor = FuzzyMatcher.get_match_factor(asset_filetype, asset_artist, asset_title, tile_artist, tile_song)
-                # print(asset_title, asset_artist, "VS", tile_song, tile_artist, current_factor)
+                current_factor = FuzzyMatcher.get_match_factor(asset_filetype, asset_artist,
+                                                               asset_title, tile_artist, tile_song)
+                self.logger.debug(str("Current match status : %s  %s VS %s  %s  , factor : %2f"
+                                      % (asset_title, asset_artist, tile_song, tile_artist, current_factor)))
                 if current_factor > max_factor:
                     target_tile = i
                     max_factor = current_factor
 
             if max_factor != 0:
-                found = 1
+                # Tends to randomly fail for no reason, give upto 3 retries ( no such element exception )
+                # log a failure only on the final failure
+                for i in range(0, 3):
+                    try:
+                        self.add_tile_asset(target_tile)
+                        self.status_matched.append(
+                            str("MATCH SUCCESS=%s, MATCH FACTOR=%s" % ( str(asset), str(max_factor))))
+                        time.sleep(1)
+                        break
+                    except Exception as e:
+                        self.logger.debug(e)
+                        if i == 2:
+                            self.logger.exception(e)
+                            self.status_failed.append("FAILED TO ADD DUE TO EXCEPTION=" + str(asset))
 
-            if found == 1:
-                try:
-                    self.add_tile_asset(target_tile)
-                    self.status_matched.append(
-                        "MATCH SUCCESS=" + str(asset) + " | " + "MATCH FACTOR=" + str(max_factor))
-                    time.sleep(1)
-                except Exception as e:
-                    print(e)
-                    self.status_failed.append("FAILED TO ADD DUE TO EXCEPTION=" + str(asset))
             else:
                 self.status_failed.append("FAILED TO MATCH=" + str(asset))
 
 
 if __name__ == "__main__":
-    ob = SpotifySetter(False)
-
+    # testing
+    test_list = [
+                (3, "alan walker", "force"),
+                (2, "siafugasudfgsidfg", "asudgausgdausydg"),
+                (3,  "ahrix", "nova"),
+                (3, "alan walker", "spectre")
+                ]
+    ob = SpotifySetter(False, test_list)

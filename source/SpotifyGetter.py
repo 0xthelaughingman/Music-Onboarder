@@ -32,6 +32,8 @@ class SpotifyGetter(DriverGetterBase):
                 .text.lower()
             tile_song = self.string_normalizer(tile_song)
             tile_artist = self.string_normalizer(tile_artist)
+            self.logger.debug(
+                str("Current Song : %s - %s" % (tile_song, tile_artist)))
             self.asset_list.append(tuple([3, tile_artist, tile_song, "Spotify Playlist"]))
 
         return

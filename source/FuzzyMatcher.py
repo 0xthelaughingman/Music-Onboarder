@@ -3,6 +3,7 @@ Utility Module to handle matching of the service asset to the file/playlist asse
 Should return a mathematical probability/factor of how good the match is.
 Preferably the range [0,1], 1 being a perfect match.
 Testfile: test_FuzzyMatcher.py (pytest)
+
 """
 
 
@@ -60,6 +61,3 @@ class FuzzyMatcher(object):
         if str1.find(str2) >= 0 or str2.find(str1) >= 0:
             return True
         return False
-
-
-

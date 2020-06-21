@@ -1,5 +1,6 @@
 """
 Module to experiment with Mutagen and the metadata ID3 tags! :)
+
 """
 
 from mutagen.easyid3 import EasyID3
