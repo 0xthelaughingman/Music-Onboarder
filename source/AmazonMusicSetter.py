@@ -32,9 +32,12 @@ class AmazonMusicSetter(DriverSetterBase):
         else:
             self.password = password
             self.email = email
-            # dismiss popup about preferences since we aren't logged in
-            self.move_and_click("//*[@id=\"dialogBoxView\"]/section/section/section[2]/button[2]", True)
-            time.sleep(1)
+            try:
+                # dismiss popup about preferences since we aren't logged in
+                self.move_and_click("//*[@id=\"dialogBoxView\"]/section/section/section[2]/button[2]", True)
+                time.sleep(1)
+            except Exception as e:
+                self.logger.exception("No popup", e)
             # self.move_and_click("//*[@id=\"transportSignInView\"]/div", True)
             self.move_and_click("//*[@id=\"contextMenu\"]/li[1]/a", True)
             self.driver.find_element_by_xpath("//*[@id=\"ap_email\"]").send_keys(self.email)
