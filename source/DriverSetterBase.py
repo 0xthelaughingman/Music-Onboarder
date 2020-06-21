@@ -6,12 +6,10 @@ The drivers are currently designed to be able to run as standalone modules to as
 sub class init prototype:(self, test_mode=False,  asset_list=list, email=None, password=None, playlist=None)
 
 As such, the sub class constructors are expected to allow the following legal usage/param combinations:
--(self, test_mode=False, asset_list=list) -> For a mock user case, where the user inputs the required params.
 
--(self, test_mode=True, asset_list=list, email, password) ->Where the login is automated, playlist and assets
-are default test configs.
+-(self, test_mode=True, asset_list=list, email, password) -> Testing scenario, where the login is automated.
 
--(self, test_mode=False, asset_list=list) -> ETE case,
+-(self, test_mode=False, asset_list=list, None, None, playlist_name) -> ETE case,
 as is expected to be run from the app once the prerequisites are already collected in a separate module
 
 """
@@ -94,14 +92,11 @@ class DriverSetterBase:
         total = len(self.asset_list)
         self.logger.critical("-"*40)
         self.logger.critical("SetterName:" + self.__class__.__name__)
-        self.logger.critical("Total=" + str(total) + ", Matches=" + str(matched) + ", Rate=" + str(match_rate) + ", Failures=" + str(failed))
+        self.logger.critical(str("Total=%d, Matches=%d, Rate=%.2f, Failures=%d" % (total, matched, match_rate, failed)))
 
         for item in self.status_matched:
             self.logger.critical(item)
         for item in self.status_failed:
             self.logger.critical(item)
 
-        self.logger.critical("Execution time= " + str(self.exec_time))
-
-
-
+        self.logger.critical(str("Execution time=%.2f" % self.exec_time))

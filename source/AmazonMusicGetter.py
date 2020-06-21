@@ -2,7 +2,6 @@ from datetime import timedelta
 from source.DriverGetterBase import DriverGetterBase
 import time
 import re
-import logging
 
 
 class AmazonMusicGetter(DriverGetterBase):
@@ -20,7 +19,8 @@ class AmazonMusicGetter(DriverGetterBase):
     """
     Amazon has an interesting way to render their playlist items, probably to optimise performance.
     There's always 3 tables in the container, with each having 14 elements regardless of the actual element counts.
-    As one scrolls down enough, the first table gets a Ytransform(in terms of Pixels, increments of 700) to where the elements of the 4th logical table are.
+    As one scrolls down enough, the first table gets a Ytransform(in terms of Pixels, increments of 700) 
+    to where the elements of the 4th logical table are.
     Then the 2nd table transforms to the 5th table...and so on. Kind of a rolling/recycler view of sorts? Idk.
     """
     def find_assets(self):
@@ -28,7 +28,8 @@ class AmazonMusicGetter(DriverGetterBase):
         # dismiss popup about preferences since we aren't logged in
         self.move_and_click("//*[@id=\"dialogBoxView\"]/section/section/section[2]/button[2]", True)
         time.sleep(2)
-        description = self.driver.find_element_by_xpath("//*[@id=\"dragonflyView\"]/div/div/div/div[2]/div[3]").get_attribute("innerHTML")
+        description = self.driver.find_element_by_xpath("//*[@id=\"dragonflyView\"]/div/div/div/div[2]/div[3]")\
+            .get_attribute("innerHTML")
         match = re.search("(?P<count>\d+)\s*songs", description)
         total_songs = 0
         if match:
@@ -36,7 +37,7 @@ class AmazonMusicGetter(DriverGetterBase):
         self.logger.debug("Total Songs :" + str(total_songs))
         total_tables = self.driver.find_elements_by_xpath(
             "//section[@class=\"playlistDetailsList noSelect\"]/div/div/table")
-        logging.debug("Total Tables :" + str(len(total_tables)))
+        self.logger.debug("Total Tables :" + str(len(total_tables)))
         cur_song_counter = 0
 
         # NEEDS WAY MORE TESTING, lots of possible cases.
@@ -50,15 +51,21 @@ class AmazonMusicGetter(DriverGetterBase):
                     # Make sure the assets are rendered/in-view
                     try:
                         self.move_and_click(
-                            "//section[@class=\"playlistDetailsList noSelect\"]/div/div/table[" + str(table) + "]/tr[" + str(i) + "]/td[4]", False)
-                    except Exception:
+                            "//section[@class=\"playlistDetailsList noSelect\"]/div/div/table["
+                            + str(table)
+                            + "]/tr[" + str(i) + "]/td[4]", False)
+
+                    except Exception as e:
                         # No more items, only ghost/recycler items.
+                        self.logger.exception(e)
                         break
                     tile_song = self.driver.find_element_by_xpath(
-                        "//section[@class=\"playlistDetailsList noSelect\"]/div/div/table[" + str(table) + "]/tr[" + str(i) + "]/td[4]") \
+                        "//section[@class=\"playlistDetailsList noSelect\"]/div/div/table[" + str(table)
+                        + "]/tr[" + str(i) + "]/td[4]") \
                         .get_attribute("title").lower()
                     tile_artist = self.driver.find_element_by_xpath(
-                        "//section[@class=\"playlistDetailsList noSelect\"]/div/div/table[" + str(table) + "]/tr[" + str(i) + "]/td[4]/span[1]/span") \
+                        "//section[@class=\"playlistDetailsList noSelect\"]/div/div/table[" + str(table)
+                        + "]/tr[" + str(i) + "]/td[4]/span[1]/span") \
                         .get_attribute("title").lower()
                     tile_song = self.string_normalizer(tile_song)
                     tile_artist = self.string_normalizer(tile_artist)
