@@ -24,10 +24,12 @@ class AmazonMusicGetter(DriverGetterBase):
     Then the 2nd table transforms to the 5th table...and so on. Kind of a rolling/recycler view of sorts? Idk.
     """
     def find_assets(self):
-
-        # dismiss popup about preferences since we aren't logged in
-        self.move_and_click("//*[@id=\"dialogBoxView\"]/section/section/section[2]/button[2]", True)
-        time.sleep(2)
+        try:
+            # dismiss popup about preferences since we aren't logged in
+            self.move_and_click("//*[@id=\"dialogBoxView\"]/section/section/section[2]/button[2]", True)
+            time.sleep(2)
+        except Exception as e:
+            self.logger.exception("No popup", e)
         description = self.driver.find_element_by_xpath("//*[@id=\"dragonflyView\"]/div/div/div/div[2]/div[3]")\
             .get_attribute("innerHTML")
         match = re.search("(?P<count>\d+)\s*songs", description)

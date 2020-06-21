@@ -31,7 +31,7 @@ class SpotifySetter(DriverSetterBase):
         else:
             self.password = password
             self.email = email
-            self.move_and_click("//*[@id=\"main\"]/div/div[3]/div[1]/header/div[4]/button[2]", True)
+            self.move_and_click("//button[text()=\"Log in\"]", True)
             self.driver.find_element_by_xpath("//*[@id=\"login-username\"]").send_keys(self.email)
             self.driver.find_element_by_xpath("//*[@id=\"login-password\"]").send_keys(self.password)
             self.move_and_click("//*[@id=\"login-button\"]", True)
@@ -44,8 +44,8 @@ class SpotifySetter(DriverSetterBase):
 
         self.move_and_click("//button/span[text()=\"Create Playlist\"]", True)
         self.driver.find_element_by_xpath(
-            "//*[@id=\"main\"]/div/div[4]/div/div[1]/div/div/input").send_keys(self.playlist_name)
-        self.move_and_click("//*[@id=\"main\"]/div/div[4]/div/div[2]/div[2]/button", True)
+            "//*[@class=\"inputBox-input\"]").send_keys(self.playlist_name)
+        self.move_and_click("//button[text()=\"CREATE\"]", True)
 
     # Method to handle the adding of selected tile asset to playlist
     def add_tile_asset(self, target_tile: int):
@@ -64,14 +64,14 @@ class SpotifySetter(DriverSetterBase):
         # iterate through playlists to find our playlist
         time.sleep(1)
         playlists = self.driver.find_elements_by_xpath(
-            "//*[@id=\"main\"]/div/div[4]/div/div[2]/div/div")
+            "//*[@id=\"main\"]/div/div[3]/div/div[4]/div/div/div[2]/div")
         # print("playlist len: ", len(playlists))
 
         # Leads to an exception at times as the playlist dialog never opens up ...
         playlist_loc = 1
         for i in range(1, min(len(playlists)+1, 5)):
             cur_playlist = self.driver.find_element_by_xpath(
-                "//*[@id=\"main\"]/div/div[4]/div/div[2]/div/div[" + str(i) + "]/div/div/div/div/div/div[2]/div/div") \
+                "//*[@id=\"main\"]/div/div[3]/div/div[4]/div/div/div[2]/div[" + str(i) + "]/div/div/div/div/div[2]/div/div/span") \
                 .text
             # print("Current Playlist= ", cur_playlist)
             if cur_playlist == self.playlist_name:
@@ -80,17 +80,17 @@ class SpotifySetter(DriverSetterBase):
         self.logger.debug(str("playlist loc: %d" % playlist_loc))
         # Making sure playlist visible
         self.move_and_click(
-            "//*[@id=\"main\"]/div/div[4]/div/div[2]/div/div[" + str(playlist_loc) + "]/div/div/div/div/div/div[1]/div",
+            "//*[@id=\"main\"]/div/div[3]/div/div[4]/div/div/div[2]/div[" + str(playlist_loc) + "]/div/div/div/div/div[1]/div",
             True)
 
     # Method for handling the searching of an asset, returns the number of tiles available after the search
     def search_asset(self, artist, title):
         # click the search button to transition to the search page
         time.sleep(1)
-        self.move_and_click("//*[@id=\"main\"]/div/div[3]/div[2]/nav/ul/li[2]/div/a/div/div[3]", True)
+        self.move_and_click("//span[text()=\"Search\"]", True)
 
         search_area = self.driver.find_element_by_xpath(
-            "//*[@id=\"main\"]/div/div[3]/div[1]/header/div[3]/div/div/label/input"
+            "//input[@data-testid=\"search-input\"]"
         )
         ActionChains(self.driver).move_to_element(search_area).click(search_area).perform()
         search_area.clear()
@@ -131,7 +131,7 @@ class SpotifySetter(DriverSetterBase):
                     .text.lower()
                 tile_artist = self.driver.find_element_by_xpath(
                     "//*[@id=\"searchPage\"]/div/div/section[2]/div/div[2]/div[" + str(i)
-                    + "]/div/div/div[3]/div/span/a")\
+                    + "]/div/div/div[3]/div/a")\
                     .text.lower()
                 # Match condition, needs a proper handler class with advanced logic/fuzzy....
                 current_factor = FuzzyMatcher.get_match_factor(asset_filetype, asset_artist,

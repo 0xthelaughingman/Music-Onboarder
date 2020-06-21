@@ -99,4 +99,4 @@ class DriverSetterBase:
         for item in self.status_failed:
             self.logger.critical(item)
 
-        self.logger.critical(str("Execution time=%.2f" % self.exec_time))
+        self.logger.critical(str("Execution time=%s" % str(self.exec_time)))
