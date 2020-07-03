@@ -16,7 +16,7 @@ Objective:
 * Spotify UI/layout changes disrupt Selenium flow now and then.
 
 
-#TODO
+# TODOs
 1. Ensure DirHandler can handle paths across both supported OS.
 2. Add handling for the odd case ( FuzzyMatcher )
 3. Ensure proper exception handling/logging.
